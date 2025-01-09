@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from open_webui.models.groups import (
+    GroupAllUserIn,
     GroupAllUserNotIn,
     Groups,
     GroupForm,
@@ -73,13 +74,29 @@ async def get_group_by_id(id: str, user=Depends(get_admin_user)):
         )
         
 ############################
-# GetGroupById
+# GetGroupUsersNotIn
 ############################
 
 
-@router.get("/id/{id}/users", response_model=Optional[GroupAllUserNotIn])
+@router.get("/id/{id}/users/not", response_model=Optional[GroupAllUserNotIn])
 async def get_group_users_not_in(id: str, user=Depends(get_admin_user)):
     group = Groups.get_group_users_not_in(id)
+    if group:
+        return group
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ERROR_MESSAGES.NOT_FOUND,
+        )
+        
+############################
+# GetGroupUsersIn
+############################
+
+
+@router.get("/id/{id}/users", response_model=Optional[GroupAllUserIn])
+async def get_group_users_in(id: str, user=Depends(get_admin_user)):
+    group = Groups.get_group_users_in(id)
     if group:
         return group
     else:

@@ -81,6 +81,11 @@ class GroupAllUserNotIn(BaseModel):
     id: str
     user_id: str
     user_ids: list[str] = []
+    
+class GroupAllUserIn(BaseModel):
+    id: str
+    user_id: str
+    user_ids: list[str] = []
 
 
 class GroupForm(BaseModel):
@@ -170,6 +175,17 @@ class GroupTable:
                     return None
         except Exception as e:
             log.exception(e)
+            return None
+    
+    def get_group_users_in(self, id: str) -> Optional[GroupAllUserIn]:
+        group = self.get_group_by_id(id)
+        if group:
+            return GroupAllUserIn(
+                id=group.id,
+                user_id=group.user_id,
+                user_ids=group.user_ids,
+            )
+        else:
             return None
 
     def get_group_user_ids_by_id(self, id: str) -> Optional[str]:
