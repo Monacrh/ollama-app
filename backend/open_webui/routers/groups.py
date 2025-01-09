@@ -3,11 +3,14 @@ from pathlib import Path
 from typing import Optional
 
 from open_webui.models.groups import (
+    GroupAllUserNotIn,
     Groups,
     GroupForm,
     GroupUpdateForm,
     GroupResponse,
 )
+
+from open_webui.models.users import Users
 
 from open_webui.config import CACHE_DIR
 from open_webui.constants import ERROR_MESSAGES
@@ -61,6 +64,22 @@ async def create_new_function(form_data: GroupForm, user=Depends(get_admin_user)
 @router.get("/id/{id}", response_model=Optional[GroupResponse])
 async def get_group_by_id(id: str, user=Depends(get_admin_user)):
     group = Groups.get_group_by_id(id)
+    if group:
+        return group
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ERROR_MESSAGES.NOT_FOUND,
+        )
+        
+############################
+# GetGroupById
+############################
+
+
+@router.get("/id/{id}/users", response_model=Optional[GroupAllUserNotIn])
+async def get_group_users_not_in(id: str, user=Depends(get_admin_user)):
+    group = Groups.get_group_users_not_in(id)
     if group:
         return group
     else:

@@ -4,6 +4,7 @@ import time
 from typing import Optional
 import uuid
 
+from open_webui.models.users import User
 from open_webui.internal.db import Base, get_db
 from open_webui.env import SRC_LOG_LEVELS
 
@@ -75,6 +76,11 @@ class GroupResponse(BaseModel):
     user_ids: list[str] = []
     created_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
+    
+class GroupAllUserNotIn(BaseModel):
+    id: str
+    user_id: str
+    user_ids: list[str] = []
 
 
 class GroupForm(BaseModel):
@@ -144,6 +150,26 @@ class GroupTable:
                 group = db.query(Group).filter_by(id=id).first()
                 return GroupModel.model_validate(group) if group else None
         except Exception:
+            return None
+        
+    def get_group_users_not_in(self, id: str) -> Optional[GroupAllUserNotIn]:
+        try:
+            with get_db() as db:
+                group = db.query(Group).filter_by(id=id).first()
+                if group:
+                    all_users = db.query(User).all()
+                    user_ids = [user.id for user in all_users]
+                    user_ids = list(set(user_ids) - set(group.user_ids))
+                        
+                    return GroupAllUserNotIn(
+                        id=group.id,
+                        user_id=group.user_id,
+                        user_ids=user_ids,
+                    )
+                else:
+                    return None
+        except Exception as e:
+            log.exception(e)
             return None
 
     def get_group_user_ids_by_id(self, id: str) -> Optional[str]:
