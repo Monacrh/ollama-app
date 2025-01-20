@@ -10,6 +10,8 @@
 	import UserPlusSolid from '$lib/components/icons/UserPlusSolid.svelte';
 	import WrenchSolid from '$lib/components/icons/WrenchSolid.svelte';
 
+	import { goto } from '$app/navigation'; // to go to the next page
+
 	export let onSubmit: Function = () => {};
 	export let onDelete: Function = () => {};
 
@@ -92,6 +94,10 @@
 		selectedTab = tabs[0];
 		init();
 	});
+
+	function goToUsersPage() {
+		goto('/admin/users/editusers'); // Navigates to the Users page
+	}
 </script>
 
 <Modal size="md" bind:show>
@@ -188,7 +194,7 @@
 								</button>
 							{/if}
 
-							{#if tabs.includes('users')}
+							<!-- {#if tabs.includes('users')}
 								<button
 									class="px-0.5 py-1 max-w-fit w-fit rounded-lg flex-1 lg:flex-none flex text-right transition {selectedTab ===
 									'users'
@@ -203,6 +209,20 @@
 										<UserPlusSolid />
 									</div>
 									<div class=" self-center">{$i18n.t('Users')} ({userIds.length})</div>
+								</button>
+							{/if} -->
+							{#if tabs.includes('users')}
+								<button
+									class="px-0.5 py-1 max-w-fit w-fit rounded-lg flex-1 lg:flex-none flex text-right transition"
+									class:active={selectedTab === 'users'}
+									class:inactive={selectedTab !== 'users'}
+									on:click={goToUsersPage}
+									type="button"
+								>
+									<div class="self-center mr-2">
+										<UserPlusSolid />
+									</div>
+									<div class="self-center">Users</div>
 								</button>
 							{/if}
 						</div>

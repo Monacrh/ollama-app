@@ -327,6 +327,10 @@ type UserUpdateForm = {
 	email: string;
 	name: string;
 	password: string;
+	groups?: Array<{
+		id: string;
+		name: string;
+	  }>;
 };
 
 export const updateUserById = async (token: string, userId: string, user: UserUpdateForm) => {

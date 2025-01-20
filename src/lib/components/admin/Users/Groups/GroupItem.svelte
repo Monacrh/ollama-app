@@ -11,6 +11,9 @@
 	import UserCircleSolid from '$lib/components/icons/UserCircleSolid.svelte';
 	import GroupModal from './EditGroupModal.svelte';
 
+	import { goto } from '$app/navigation'; // to go to the next page
+
+
 	export let users = [];
 	export let group = {
 		name: 'Admins',
@@ -57,9 +60,7 @@
 
 <button
 	class="flex items-center gap-3 justify-between px-1 text-xs w-full transition"
-	on:click={() => {
-		showEdit = true;
-	}}
+	on:click={() => goto(`/admin/users/editusers`)}
 >
 	<div class="flex items-center gap-1.5 w-full font-medium">
 		<div>

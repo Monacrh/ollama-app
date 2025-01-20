@@ -7,7 +7,8 @@ import type { Socket } from 'socket.io-client';
 // Backend
 export const WEBUI_NAME = writable(APP_NAME);
 export const config: Writable<Config | undefined> = writable(undefined);
-export const user: Writable<SessionUser | undefined> = writable(undefined);
+// export const user: Writable<SessionUser | undefined> = writable(undefined);
+export const user = writable([]);
 
 // Frontend
 export const MODEL_DOWNLOAD_POOL = writable({});
