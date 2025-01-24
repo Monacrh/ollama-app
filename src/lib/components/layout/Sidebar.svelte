@@ -489,11 +489,11 @@
 					}, 0);
 				}}
 			>
-				<div class="flex items-center">
+				<!-- <div class="flex items-center">
 					<div class="self-center mx-1.5">
 						<img
 							crossorigin="anonymous"
-							src="{WEBUI_BASE_URL}/static/favicon.png"
+							src="{WEBUI_BASE_URL}/static/favicon/telu.png"
 							class=" size-5 -translate-x-1.5 rounded-full"
 							alt="logo"
 						/>
@@ -501,15 +501,24 @@
 					<div class=" self-center font-medium text-sm text-gray-850 dark:text-white font-primary">
 						{$i18n.t('New Chat')}
 					</div>
+				</div> -->
+				<div class="flex items-center">
+					<img
+						crossorigin="anonymous"
+						src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dtelkom%2BUniversity&psig=AOvVaw1XleTqN_JGyxSw8PSGyZkE&ust=1737812524163000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKj18KS-josDFQAAAAAdAAAAABAE"
+						class="size-5 -translate-x-1.5 rounded-full"
+						alt="logo"
+					/>
 				</div>
+				
 
-				<div>
+				<!-- <div>
 					<PencilSquare className=" size-5" strokeWidth="2" />
-				</div>
+				</div> -->
 			</a>
 		</div>
 
-		{#if $user?.role === 'admin' || $user?.permissions?.workspace?.models || $user?.permissions?.workspace?.knowledge || $user?.permissions?.workspace?.prompts || $user?.permissions?.workspace?.tools}
+		<!-- {#if $user?.role === 'admin' || $user?.permissions?.workspace?.models || $user?.permissions?.workspace?.knowledge || $user?.permissions?.workspace?.prompts || $user?.permissions?.workspace?.tools}
 			<div class="px-1.5 flex justify-center text-gray-800 dark:text-gray-200">
 				<a
 					class="flex-grow flex space-x-3 rounded-lg px-2 py-[7px] hover:bg-gray-100 dark:hover:bg-gray-900 transition"
@@ -546,7 +555,7 @@
 					</div>
 				</a>
 			</div>
-		{/if}
+		{/if} -->
 
 		<div class="relative {$temporaryChatEnabled ? 'opacity-20' : ''}">
 			{#if $temporaryChatEnabled}
@@ -822,8 +831,8 @@
 				</div>
 			</Folder>
 		</div>
-
-		<div class="px-2">
+<!-- admin panel -->
+		<!-- <div class="px-2">
 			<div class="flex flex-col font-primary">
 				{#if $user !== undefined}
 					<UserMenu
@@ -852,7 +861,7 @@
 					</UserMenu>
 				{/if}
 			</div>
-		</div>
+		</div> -->
 	</div>
 </div>
 
