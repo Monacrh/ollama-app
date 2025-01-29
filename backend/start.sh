@@ -33,25 +33,24 @@ fi
 # Check if SPACE_ID is set, if so, configure for space
 if [ -n "$SPACE_ID" ]; then
   echo "Configuring for HuggingFace Space deployment"
-  if [ -n "$ADMIN_USER_EMAIL" ] && [ -n "$ADMIN_USER_PASSWORD" ]; then
-    echo "Admin user configured, creating"
-    WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" uvicorn open_webui.main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*' &
-    webui_pid=$!
-    echo "Waiting for webui to start..."
-    while ! curl -s http://localhost:8080/health > /dev/null; do
-      sleep 1
-    done
-    echo "Creating admin user..."
-    curl \
-      -X POST "http://localhost:8080/api/v1/auths/signup" \
-      -H "accept: application/json" \
-      -H "Content-Type: application/json" \
-      -d "{ \"email\": \"${ADMIN_USER_EMAIL}\", \"password\": \"${ADMIN_USER_PASSWORD}\", \"name\": \"Admin\" }"
-    echo "Shutting down webui..."
-    kill $webui_pid
-  fi
+fi
 
-  export WEBUI_URL=${SPACE_HOST}
+if [ -n "$ADMIN_USER_EMAIL" ] && [ -n "$ADMIN_USER_PASSWORD" ]; then
+  echo "Admin user configured, creating"
+  WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" uvicorn open_webui.main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*' &
+  webui_pid=$!
+  echo "Waiting for webui to start..."
+  while ! curl -s http://localhost:8080/health > /dev/null; do
+    sleep 1
+  done
+  echo "Creating admin user..."
+  curl \
+    -X POST "http://localhost:8080/api/v1/auths/signup" \
+    -H "accept: application/json" \
+    -H "Content-Type: application/json" \
+    -d "{ \"email\": \"${ADMIN_USER_EMAIL}\", \"password\": \"${ADMIN_USER_PASSWORD}\", \"name\": \"Admin\" }"
+  echo "Shutting down webui..."
+  kill $webui_pid
 fi
 
 WEBUI_SECRET_KEY="$WEBUI_SECRET_KEY" exec uvicorn open_webui.main:app --host "$HOST" --port "$PORT" --forwarded-allow-ips '*'
