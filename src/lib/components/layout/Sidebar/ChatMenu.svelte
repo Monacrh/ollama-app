@@ -30,9 +30,6 @@
 
 	const i18n = getContext('i18n');
 
-	export let shareHandler: Function;
-	export let cloneChatHandler: Function;
-	export let archiveChatHandler: Function;
 	export let renameHandler: Function;
 	export let deleteHandler: Function;
 	export let onClose: Function;
@@ -140,7 +137,7 @@
 			align="start"
 			transition={flyAndScale}
 		>
-			<DropdownMenu.Item
+			<!-- <DropdownMenu.Item
 				class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
 				on:click={() => {
 					pinHandler();
@@ -153,7 +150,7 @@
 					<Bookmark strokeWidth="2" />
 					<div class="flex items-center">{$i18n.t('Pin')}</div>
 				{/if}
-			</DropdownMenu.Item>
+			</DropdownMenu.Item> -->
 
 			<DropdownMenu.Item
 				class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
@@ -165,7 +162,7 @@
 				<div class="flex items-center">{$i18n.t('Rename')}</div>
 			</DropdownMenu.Item>
 
-			<DropdownMenu.Item
+			<!-- <DropdownMenu.Item
 				class="flex gap-2 items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
 				on:click={() => {
 					cloneChatHandler();
@@ -193,9 +190,9 @@
 			>
 				<Share />
 				<div class="flex items-center">{$i18n.t('Share')}</div>
-			</DropdownMenu.Item>
+			</DropdownMenu.Item> -->
 
-			<DropdownMenu.Sub>
+			<!-- <DropdownMenu.Sub>
 				<DropdownMenu.SubTrigger
 					class="flex gap-2 items-center px-3 py-2 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
 				>
@@ -234,7 +231,7 @@
 						<div class="flex items-center line-clamp-1">{$i18n.t('PDF document (.pdf)')}</div>
 					</DropdownMenu.Item>
 				</DropdownMenu.SubContent>
-			</DropdownMenu.Sub>
+			</DropdownMenu.Sub> -->
 			<DropdownMenu.Item
 				class="flex  gap-2  items-center px-3 py-1.5 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
 				on:click={() => {

@@ -323,7 +323,6 @@
 					</button>
 				</Tooltip>
 			</div>
-		{:else if shiftKey && mouseOver}
 			<div class=" flex items-center self-center space-x-1.5">
 				<Tooltip content={$i18n.t('Archive')} className="flex items-center">
 					<button
@@ -353,15 +352,6 @@
 			<div class="flex self-center space-x-1 z-10">
 				<ChatMenu
 					chatId={id}
-					cloneChatHandler={() => {
-						cloneChatHandler(id);
-					}}
-					shareHandler={() => {
-						showShareChatModal = true;
-					}}
-					archiveChatHandler={() => {
-						archiveChatHandler(id);
-					}}
 					renameHandler={() => {
 						chatTitle = title;
 
