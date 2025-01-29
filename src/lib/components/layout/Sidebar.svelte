@@ -396,14 +396,14 @@
 	});
 </script>
 
-<ArchivedChatsModal
+<!-- <ArchivedChatsModal
 	bind:show={$showArchivedChats}
 	on:change={async () => {
 		await initChatList();
 	}}
-/>
+/> -->
 
-<ChannelModal
+<!-- <ChannelModal
 	bind:show={showCreateChannel}
 	onSubmit={async ({ name, access_control }) => {
 		const res = await createNewChannel(localStorage.token, {
@@ -420,7 +420,7 @@
 			showCreateChannel = false;
 		}
 	}}
-/>
+/> -->
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 
@@ -479,7 +479,7 @@
 				draggable="false"
 				on:click={async () => {
 					selectedChatId = null;
-					await goto('/');
+					await goto('/telyu');
 					const newChatButton = document.getElementById('new-chat-button');
 					setTimeout(() => {
 						newChatButton?.click();
@@ -557,7 +557,7 @@
 			</div>
 		{/if} -->
 
-		<div class="relative {$temporaryChatEnabled ? 'opacity-20' : ''}">
+		<!-- <div class="relative {$temporaryChatEnabled ? 'opacity-20' : ''}">
 			{#if $temporaryChatEnabled}
 				<div class="absolute z-40 w-full h-full flex justify-center"></div>
 			{/if}
@@ -567,14 +567,14 @@
 				on:input={searchDebounceHandler}
 				placeholder={$i18n.t('Search')}
 			/>
-		</div>
+		</div> -->
 
 		<div
 			class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
 				? 'opacity-20'
 				: ''}"
 		>
-			{#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
+			<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
 				<Folder
 					className="px-2 mt-0.5"
 					name={$i18n.t('Channels')}
@@ -595,12 +595,12 @@
 						/>
 					{/each}
 				</Folder>
-			{/if}
+			{/if} -->
 
 			<Folder
 				collapsible={!search}
 				className="px-2 mt-0.5"
-				name={$i18n.t('Chats')}
+				name={$i18n.t('Chat Saya')}
 				onAdd={() => {
 					createFolder();
 				}}
@@ -654,11 +654,11 @@
 					}
 				}}
 			>
-				{#if $temporaryChatEnabled}
+				<!-- {#if $temporaryChatEnabled}
 					<div class="absolute z-40 w-full h-full flex justify-center"></div>
-				{/if}
+				{/if} -->
 
-				{#if !search && $pinnedChats.length > 0}
+				<!-- {#if !search && $pinnedChats.length > 0}
 					<div class="flex flex-col space-y-1 rounded-xl">
 						<Folder
 							className=""
@@ -732,9 +732,9 @@
 							</div>
 						</Folder>
 					</div>
-				{/if}
+				{/if} -->
 
-				{#if !search && folders}
+				<!-- {#if !search && folders}
 					<Folders
 						{folders}
 						on:import={(e) => {
@@ -748,10 +748,10 @@
 							initChatList();
 						}}
 					/>
-				{/if}
+				{/if} -->
 
 				<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
-					<div class="pt-1.5">
+					<div class="pt-2.5">
 						{#if $chats}
 							{#each $chats as chat, idx}
 								{#if idx === 0 || (idx > 0 && chat.time_range !== $chats[idx - 1].time_range)}
