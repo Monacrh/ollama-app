@@ -1864,37 +1864,62 @@
 			{initNewChat}
 		/>
 
-		<PaneGroup direction="horizontal" class="w-full h-full">
-			<Pane defaultSize={50} class="h-full flex w-full relative">
-				{#if $banners.length > 0 && !history.currentId && !$chatId && selectedModels.length <= 1}
-					<div class="absolute top-12 left-0 right-0 w-full z-30">
-						<div class=" flex flex-col gap-1 w-full">
-							{#each $banners.filter( (b) => (b.dismissible ? !JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]').includes(b.id) : true) ) as banner}
-								<Banner
-									{banner}
-									on:dismiss={(e) => {
-										const bannerId = e.detail;
-
-										localStorage.setItem(
-											'dismissedBannerIds',
-											JSON.stringify(
-												[
-													bannerId,
-													...JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]')
-												].filter((id) => $banners.find((b) => b.id === id))
-											)
-										);
-									}}
-								/>
-							{/each}
-						</div>
+		<!-- Welcome Screen -->
+		{#if !$chatId && createMessagesList(history.currentId).length === 0}
+			<div class="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-900 z-10">
+				<div class="flex flex-col items-center justify-center h-full w-full">
+					<!-- Logo -->
+					<div class="animate-float mb-4">
+						<img 
+							src="/static/telu.png" 
+							class="w-48 h-48 mx-auto object-contain"
+							alt="Ollama Logo"
+							crossorigin="anonymous"
+							loading="eager"
+						/>
 					</div>
-				{/if}
 
-				<div class="flex flex-col flex-auto z-10 w-full">
-					{#if $settings?.landingPageMode === 'chat' || createMessagesList(history.currentId).length > 0}
+					<!-- Text at Bottom -->
+					<div class="flex-0 pb-12 text-center">
+						<h1 class="text-2xl font-semibold text-gray-700 dark:text-gray-300">
+						  Selamat Datang di PROJECT OLLAMA Universitas Telkom.
+						</h1>
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Chat Interface (only shows when not in welcome screen) -->
+		{#if $chatId || createMessagesList(history.currentId).length > 0}
+			<PaneGroup direction="horizontal" class="w-full h-full">
+				<Pane defaultSize={50} class="h-full flex w-full relative">
+					{#if $banners.length > 0 && !history.currentId && !$chatId && selectedModels.length <= 1}
+						<div class="absolute top-12 left-0 right-0 w-full z-30">
+							<div class="flex flex-col gap-1 w-full">
+								{#each $banners.filter( (b) => (b.dismissible ? !JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]').includes(b.id) : true) ) as banner}
+									<Banner
+										{banner}
+										on:dismiss={(e) => {
+											const bannerId = e.detail;
+											localStorage.setItem(
+												'dismissedBannerIds',
+												JSON.stringify(
+													[
+														bannerId,
+														...JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]')
+													].filter((id) => $banners.find((b) => b.id === id))
+												)
+											);
+										}}
+									/>
+								{/each}
+							</div>
+						</div>
+					{/if}
+
+					<div class="flex flex-col flex-auto z-10 w-full">
 						<div
-							class=" pb-2.5 flex flex-col justify-between w-full flex-auto overflow-auto h-0 max-w-full z-10 scrollbar-hidden"
+							class="pb-2.5 flex flex-col justify-between w-full flex-auto overflow-auto h-0 max-w-full z-10 scrollbar-hidden"
 							id="messages-container"
 							bind:this={messagesContainerElement}
 							on:scroll={(e) => {
@@ -1903,7 +1928,7 @@
 									messagesContainerElement.clientHeight + 5;
 							}}
 						>
-							<div class=" h-full w-full flex flex-col">
+							<div class="h-full w-full flex flex-col">
 								<Messages
 									chatId={$chatId}
 									bind:history
@@ -1923,7 +1948,7 @@
 							</div>
 						</div>
 
-						<div class=" pb-[1rem]">
+						<div class="pb-[1rem]">
 							<MessageInput
 								{history}
 								{selectedModels}
@@ -1945,7 +1970,6 @@
 								}}
 								on:upload={async (e) => {
 									const { type, data } = e.detail;
-
 									if (type === 'web') {
 										await uploadWeb(data);
 									} else if (type === 'youtube') {
@@ -1965,73 +1989,39 @@
 									}
 								}}
 							/>
-
-							<div
-								class="absolute bottom-1 text-xs text-gray-500 text-center line-clamp-1 right-0 left-0"
-							>
-								<!-- {$i18n.t('LLMs can make mistakes. Verify important information.')} -->
-							</div>
 						</div>
-					{:else}
-						<div class="overflow-auto w-full h-full flex items-center">
-							<Placeholder
-								{history}
-								{selectedModels}
-								bind:files
-								bind:prompt
-								bind:autoScroll
-								bind:selectedToolIds
-								bind:webSearchEnabled
-								bind:atSelectedModel
-								transparentBackground={$settings?.backgroundImageUrl ?? false}
-								{stopResponse}
-								{createMessagePair}
-								on:upload={async (e) => {
-									const { type, data } = e.detail;
+					</div>
+				</Pane>
 
-									if (type === 'web') {
-										await uploadWeb(data);
-									} else if (type === 'youtube') {
-										await uploadYoutubeTranscription(data);
-									}
-								}}
-								on:submit={async (e) => {
-									if (e.detail) {
-										await tick();
-										submitPrompt(
-											($settings?.richTextInput ?? true)
-												? e.detail.replaceAll('\n\n', '\n')
-												: e.detail
-										);
-									}
-								}}
-							/>
-						</div>
-					{/if}
-				</div>
-			</Pane>
-
-			<ChatControls
-				bind:this={controlPaneComponent}
-				bind:history
-				bind:chatFiles
-				bind:params
-				bind:files
-				bind:pane={controlPane}
-				chatId={$chatId}
-				modelId={selectedModelIds?.at(0) ?? null}
-				models={selectedModelIds.reduce((a, e, i, arr) => {
-					const model = $models.find((m) => m.id === e);
-					if (model) {
-						return [...a, model];
-					}
-					return a;
-				}, [])}
-				{submitPrompt}
-				{stopResponse}
-				{showMessage}
-				{eventTarget}
-			/>
-		</PaneGroup>
+				<ChatControls
+					bind:this={controlPaneComponent}
+					bind:history
+					bind:chatFiles
+					bind:params
+					bind:files
+					bind:pane={controlPane}
+					chatId={$chatId}
+					modelId={selectedModelIds?.at(0) ?? null}
+					models={selectedModelIds.reduce((a, e, i, arr) => {
+						const model = $models.find((m) => m.id === e);
+						return model ? [...a, model] : a;
+					}, [])}
+					{submitPrompt}
+					{stopResponse}
+					{showMessage}
+					{eventTarget}
+				/>
+			</PaneGroup>
+		{/if}
 	</div>
 {/if}
+
+<style>
+	@keyframes float {
+		0%, 100% { transform: translateY(0); }
+		50% { transform: translateY(-10px); }
+	}
+	.animate-float {
+		animation: float 3s ease-in-out infinite;
+	}
+</style>
