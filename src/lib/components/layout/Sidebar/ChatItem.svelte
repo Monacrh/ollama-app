@@ -29,7 +29,7 @@
 	} from '$lib/stores';
 
 	import ChatMenu from './ChatMenu.svelte';
-	import DeleteConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
+	import DeleteConfirmDialog from '$lib/components/common/ActionConfirm.svelte';
 	import ShareChatModal from '$lib/components/chat/ShareChatModal.svelte';
 	import GarbageBin from '$lib/components/icons/GarbageBin.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
@@ -198,14 +198,12 @@
 
 <DeleteConfirmDialog
 	bind:show={showDeleteConfirm}
-	title={$i18n.t('Delete chat?')}
+	title={$i18n.t('Hapus')}
+	entityName={'Chat'}
 	on:confirm={() => {
 		deleteChatHandler(id);
 	}}
 >
-	<div class=" text-sm text-gray-500 flex-1 line-clamp-3">
-		{$i18n.t('This will delete')} <span class="  font-semibold">{title}</span>.
-	</div>
 </DeleteConfirmDialog>
 
 {#if dragged && x && y}
