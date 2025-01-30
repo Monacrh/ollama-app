@@ -38,42 +38,42 @@
 
 	let models = [];
 
-	const selectSuggestionPrompt = async (p) => {
-		let text = p;
+	// const selectSuggestionPrompt = async (p) => {
+	// 	let text = p;
 
-		if (p.includes('{{CLIPBOARD}}')) {
-			const clipboardText = await navigator.clipboard.readText().catch((err) => {
-				toast.error($i18n.t('Failed to read clipboard contents'));
-				return '{{CLIPBOARD}}';
-			});
+	// 	if (p.includes('{{CLIPBOARD}}')) {
+	// 		const clipboardText = await navigator.clipboard.readText().catch((err) => {
+	// 			toast.error($i18n.t('Failed to read clipboard contents'));
+	// 			return '{{CLIPBOARD}}';
+	// 		});
 
-			text = p.replaceAll('{{CLIPBOARD}}', clipboardText);
+	// 		text = p.replaceAll('{{CLIPBOARD}}', clipboardText);
 
-			console.log('Clipboard text:', clipboardText, text);
-		}
+	// 		console.log('Clipboard text:', clipboardText, text);
+	// 	}
 
-		prompt = text;
+	// 	prompt = text;
 
-		console.log(prompt);
-		await tick();
+	// 	console.log(prompt);
+	// 	await tick();
 
-		const chatInputContainerElement = document.getElementById('chat-input-container');
-		const chatInputElement = document.getElementById('chat-input');
+	// 	const chatInputContainerElement = document.getElementById('chat-input-container');
+	// 	const chatInputElement = document.getElementById('chat-input');
 
-		if (chatInputContainerElement) {
-			chatInputContainerElement.style.height = '';
-			chatInputContainerElement.style.height =
-				Math.min(chatInputContainerElement.scrollHeight, 200) + 'px';
-		}
+	// 	if (chatInputContainerElement) {
+	// 		chatInputContainerElement.style.height = '';
+	// 		chatInputContainerElement.style.height =
+	// 			Math.min(chatInputContainerElement.scrollHeight, 200) + 'px';
+	// 	}
 
-		await tick();
-		if (chatInputElement) {
-			chatInputElement.focus();
-			chatInputElement.dispatchEvent(new Event('input'));
-		}
+	// 	await tick();
+	// 	if (chatInputElement) {
+	// 		chatInputElement.focus();
+	// 		chatInputElement.dispatchEvent(new Event('input'));
+	// 	}
 
-		await tick();
-	};
+	// 	await tick();
+	// };
 
 	let selectedModelIdx = 0;
 
@@ -210,7 +210,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="mx-auto max-w-2xl font-primary" in:fade={{ duration: 200, delay: 200 }}>
+	<!-- <div class="mx-auto max-w-2xl font-primary" in:fade={{ duration: 200, delay: 200 }}>
 		<div class="mx-5">
 			<Suggestions
 				suggestionPrompts={models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
@@ -221,5 +221,5 @@
 				}}
 			/>
 		</div>
-	</div>
+	</div> -->
 </div>

@@ -56,9 +56,12 @@
 	import ChannelModal from './Sidebar/ChannelModal.svelte';
 	import ChannelItem from './Sidebar/ChannelItem.svelte';
 	import PencilSquare from '../icons/PencilSquare.svelte';
+	import {getGroups} from '$lib/apis/groups';
 	import FloatBtn from './FloatBtn.svelte';
 
 	const BREAKPOINT = 768;
+
+	let groups = [];
 
 	let navElement;
 	let search = '';
@@ -76,6 +79,45 @@
 	let allChatsLoaded = false;
 
 	let folders = {};
+
+	let activeMenuId = null;
+    
+    const toggleMenu = (groupId) => {
+        activeMenuId = activeMenuId === groupId ? null : groupId;
+    };
+
+    const handleDeleteGroup = async (groupId) => {
+        if (confirm('Are you sure you want to delete this group class?')) {
+            try {
+                await deleteGroupById(localStorage.token, groupId);
+                groups = groups.filter(g => g.id !== groupId);
+                toast.success($i18n.t('Group deleted successfully'));
+            } catch (error) {
+                toast.error(error?.message || $i18n.t('Failed to delete group'));
+            }
+        }
+        activeMenuId = null;
+    };
+
+    // Close menu when clicking outside
+    onMount(() => {
+        const closeMenu = () => activeMenuId = null;
+        document.addEventListener('click', closeMenu);
+        return () => document.removeEventListener('click', closeMenu);
+    });
+
+	const setGroups = async () => {
+        try {
+            groups = await getGroups(localStorage.token);
+        } catch (error) {
+            toast.error(error);
+        }
+    };
+
+    // Load groups on component mount
+    onMount(async () => {
+        await setGroups();
+    });
 
 	const initFolders = async () => {
 		const folderList = await getFolders(localStorage.token).catch((error) => {
@@ -597,6 +639,61 @@
 					{/each}
 				</Folder>
 			{/if} -->
+
+			<Folder
+    collapsible={!search}
+    className="px-2 mt-0.5"
+    name="Kelas Saya"
+    onAddLabel="New Group Class"
+>
+    {#if groups.length === 0}
+        <div class="text-center text-gray-500 py-4 text-sm">
+            No groups available
+        </div>
+    {:else}
+        <div class="flex flex-col">
+            {#each groups as group (group.id)}
+                <div class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800">
+                    <!-- Group Name -->
+                    <div class="flex-1 text-gray-900 dark:text-gray-200 truncate">
+                        {group.name}
+                    </div>
+
+                    <!-- Context Menu -->
+                    <div class="relative">
+                        <button
+                            class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
+                            on:click|stopPropagation={() => toggleMenu(group.id)}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+                            </svg>
+                        </button>
+
+                        {#if activeMenuId === group.id}
+                            <div class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black ring-opacity-5">
+                                <div class="py-1">
+                                    <button
+                                        class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        on:click|stopPropagation={() => handleEditGroup(group.id)}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        on:click|stopPropagation={() => handleDeleteGroup(group.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            {/each}
+        </div>
+    {/if}
+</Folder>
 
 			<Folder
 				collapsible={!search}
