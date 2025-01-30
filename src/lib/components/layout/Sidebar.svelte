@@ -56,6 +56,7 @@
 	import ChannelModal from './Sidebar/ChannelModal.svelte';
 	import ChannelItem from './Sidebar/ChannelItem.svelte';
 	import PencilSquare from '../icons/PencilSquare.svelte';
+	import FloatBtn from './FloatBtn.svelte';
 
 	const BREAKPOINT = 768;
 
@@ -443,7 +444,7 @@
 	data-state={$showSidebar}
 >
 	<div
-		class="py-2 my-auto flex flex-col justify-between h-screen max-h-[100dvh] w-[260px] overflow-x-hidden z-50 {$showSidebar
+		class="relative py-2 my-auto flex flex-col justify-between h-screen max-h-[100dvh] w-[260px] overflow-x-hidden z-50 {$showSidebar
 			? ''
 			: 'invisible'}"
 	>
@@ -862,6 +863,7 @@
 				{/if}
 			</div>
 		</div> -->
+		<FloatBtn />
 	</div>
 </div>
 
