@@ -2,6 +2,8 @@
 	import { toast } from 'svelte-sonner';
 	import { v4 as uuidv4 } from 'uuid';
 
+	import { page } from '$app/stores';
+	import { usersInGroup } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import {
 		user,
@@ -38,6 +40,7 @@
 		updateChatFolderIdById,
 		importChat
 	} from '$lib/apis/chats';
+	import { getUsersInGroup, deleteGroupById, getGroupById } from '$lib/apis/groups';
 	import { createNewFolder, getFolders, updateFolderParentIdById } from '$lib/apis/folders';
 	import { WEBUI_BASE_URL } from '$lib/constants';
 
@@ -62,6 +65,7 @@
 	const BREAKPOINT = 768;
 
 	let groups = [];
+	let group = {};
 
 	let navElement;
 	let search = '';
@@ -114,9 +118,34 @@
         }
     };
 
+	const setUserInGroups = async () => {
+		if ($page.url.pathname.includes('telyu/g')) {
+			try {
+				usersInGroup.set(await getUsersInGroup(localStorage.token, $page.params.id).then((res) => {
+					return res;
+				}));
+			} catch (error) {
+				toast.error(error);
+			}
+		}
+	};
+
+	const setGroupById = async () => {
+		if ($page.url.pathname.includes('telyu/g')) {
+			try {
+				group = await getGroupById(localStorage.token, $page.params.id);
+				console.log(group);
+			} catch (error) {
+				toast.error(error);
+			}
+		}
+	}
+
     // Load groups on component mount
     onMount(async () => {
         await setGroups();
+		await setUserInGroups();
+		await setGroupById();
     });
 
 	const initFolders = async () => {
@@ -532,7 +561,8 @@
 					}, 0);
 				}}
 			>
-				<!-- <div class="flex items-center">
+				<!-- Chat baru dengan logo telu -->
+				<div class="flex items-center">
 					<div class="self-center mx-1.5">
 						<img
 							crossorigin="anonymous"
@@ -542,19 +572,17 @@
 						/>
 					</div>
 					<div class=" self-center font-medium text-sm text-gray-850 dark:text-white font-primary">
-						{$i18n.t('New Chat')}
+						{$i18n.t('Chat Baru')}
 					</div>
-				</div> -->
-				<div class="flex items-center">
+				</div>
+				<!-- <div class="flex items-center">
 					<img
 						crossorigin="anonymous"
 						src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dtelkom%2BUniversity&psig=AOvVaw1XleTqN_JGyxSw8PSGyZkE&ust=1737812524163000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKj18KS-josDFQAAAAAdAAAAABAE"
 						class="size-5 -translate-x-1.5 rounded-full"
 						alt="logo"
 					/>
-				</div>
-				
-
+				</div> -->
 				<!-- <div>
 					<PencilSquare className=" size-5" strokeWidth="2" />
 				</div> -->
@@ -612,200 +640,368 @@
 			/>
 		</div> -->
 
+		<!-- /Cek apakah url mengarah ke kelas atau home -->
+		{#if $page.url.pathname.includes('telyu/g')}
 		<div
 			class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
 				? 'opacity-20'
 				: ''}"
 		>
-			<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
+			<p class="px-2 mt-0.5 w-full pt-2.5 text-xl text-gray-500 dark:text-gray-200">
+				{group.name}
+			</p>
+			<!-- Daftar nama anggota -->
+			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
+				<!-- Cari anggota -->
+				<div class="pt-2.5">
+					{#if $usersInGroup}
+						{#each $usersInGroup as idx, user_ids}
+							<div>
+								{idx}
+							</div>
+							<div>
+								{user_ids}
+							</div>
+						{/each}
+					{/if}
+					<!-- {#if $chats} -->
+						<!-- {#each $chats as chat, idx}
+							{#if idx === 0 || (idx > 0 && chat.time_range !== $chats[idx - 1].time_range)}
+								<div
+									class="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium {idx ===
+									0
+										? ''
+										: 'pt-5'} pb-1.5"
+								>
+									{$i18n.t(chat.time_range)}
+								</div>
+							{/if}
+
+							<ChatItem
+								className=""
+								id={chat.id}
+								title={chat.title}
+								{shiftKey}
+								selected={selectedChatId === chat.id}
+								on:select={() => {
+									selectedChatId = chat.id;
+								}}
+								on:unselect={() => {
+									selectedChatId = null;
+								}}
+								on:change={async () => {
+									initChatList();
+								}}
+								on:tag={(e) => {
+									const { type, name } = e.detail;
+									tagEventHandler(type, name, chat.id);
+								}}
+							/>
+						{/each} -->
+
+						<!-- Digunakan untuk meload semua mahasiswa -->
+						<!-- {#if $scrollPaginationEnabled && !allChatsLoaded}
+							<Loader
+								on:visible={(e) => {
+									if (!chatListLoading) {
+										loadMoreChats();
+									}
+								}}
+							>
+								<div
+									class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
+								>
+									<Spinner className=" size-4" />
+									<div class=" ">Loading...</div>
+								</div>
+							</Loader>
+						{/if} -->
+					<!-- {:else}
+						<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
+							<Spinner className=" size-4" />
+							<div class=" ">Loading...</div>
+						</div>
+					{/if} -->
+					Daftar semua mahasiswa
+				</div>
+			</div>
+		</div>
+		{:else}
+			<div
+				class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
+					? 'opacity-20'
+					: ''}"
+			>
+				<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
+					<Folder
+						className="px-2 mt-0.5"
+						name={$i18n.t('Channels')}
+						dragAndDrop={false}
+						onAdd={$user.role === 'admin'
+							? () => {
+									showCreateChannel = true;
+								}
+							: null}
+						onAddLabel={$i18n.t('Create Channel')}
+					>
+						{#each $channels as channel}
+							<ChannelItem
+								{channel}
+								onUpdate={async () => {
+									await initChannels();
+								}}
+							/>
+						{/each}
+					</Folder>
+				{/if} -->
+				
+				<!-- Kelas Saya -->
 				<Folder
+					collapsible={!search}
 					className="px-2 mt-0.5"
-					name={$i18n.t('Channels')}
-					dragAndDrop={false}
-					onAdd={$user.role === 'admin'
-						? () => {
-								showCreateChannel = true;
-							}
-						: null}
-					onAddLabel={$i18n.t('Create Channel')}
+					name="Kelas Saya"
+					onAddLabel="New Group Class"
 				>
-					{#each $channels as channel}
-						<ChannelItem
-							{channel}
-							onUpdate={async () => {
-								await initChannels();
+					{#if groups.length === 0}
+						<div class="text-center text-gray-500 py-4 text-sm">
+							No groups available
+						</div>
+					{:else}
+						<div class="flex flex-col">
+							{#each groups as group (group.id)}
+								<div class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800">
+									<!-- Group Name -->
+									<button class="flex-1 text-gray-900 dark:text-gray-200 truncate text-left"
+										on:click={async () => {
+											await goto(`/telyu/g/${group.id}`);
+										}}
+									>
+										{group.name}
+									</button>
+
+									<!-- Context Menu -->
+									<div class="relative">
+										<button
+											class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
+											on:click|stopPropagation={() => toggleMenu(group.id)}
+										>
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+											</svg>
+										</button>
+
+										{#if activeMenuId === group.id}
+											<div class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black ring-opacity-5">
+												<div class="py-1">
+													<button
+														class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+														on:click|stopPropagation={() => handleEditGroup(group.id)}
+													>
+														Edit
+													</button>
+													<button
+														class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+														on:click|stopPropagation={() => handleDeleteGroup(group.id)}
+													>
+														Delete
+													</button>
+												</div>
+											</div>
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</Folder>
+
+				<!-- Chat Saya -->
+				<Folder
+					collapsible={!search}
+					className="px-2 mt-0.5"
+					name={$i18n.t('Chat Saya')}
+					onAdd={() => {
+						createFolder();
+					}}
+					onAddLabel={$i18n.t('New Folder')}
+					on:import={(e) => {
+						importChatHandler(e.detail);
+					}}
+					on:drop={async (e) => {
+						const { type, id, item } = e.detail;
+
+						if (type === 'chat') {
+							let chat = await getChatById(localStorage.token, id).catch((error) => {
+								return null;
+							});
+							if (!chat && item) {
+								chat = await importChat(localStorage.token, item.chat, item?.meta ?? {});
+							}
+
+							if (chat) {
+								console.log(chat);
+								if (chat.folder_id) {
+									const res = await updateChatFolderIdById(localStorage.token, chat.id, null).catch(
+										(error) => {
+											toast.error(error);
+											return null;
+										}
+									);
+								}
+
+								if (chat.pinned) {
+									const res = await toggleChatPinnedStatusById(localStorage.token, chat.id);
+								}
+
+								initChatList();
+							}
+						} else if (type === 'folder') {
+							if (folders[id].parent_id === null) {
+								return;
+							}
+
+							const res = await updateFolderParentIdById(localStorage.token, id, null).catch(
+								(error) => {
+									toast.error(error);
+									return null;
+								}
+							);
+
+							if (res) {
+								await initFolders();
+							}
+						}
+					}}
+				>
+					<!-- {#if $temporaryChatEnabled}
+						<div class="absolute z-40 w-full h-full flex justify-center"></div>
+					{/if} -->
+
+					<!-- {#if !search && $pinnedChats.length > 0}
+						<div class="flex flex-col space-y-1 rounded-xl">
+							<Folder
+								className=""
+								bind:open={showPinnedChat}
+								on:change={(e) => {
+									localStorage.setItem('showPinnedChat', e.detail);
+									console.log(e.detail);
+								}}
+								on:import={(e) => {
+									importChatHandler(e.detail, true);
+								}}
+								on:drop={async (e) => {
+									const { type, id, item } = e.detail;
+
+									if (type === 'chat') {
+										let chat = await getChatById(localStorage.token, id).catch((error) => {
+											return null;
+										});
+										if (!chat && item) {
+											chat = await importChat(localStorage.token, item.chat, item?.meta ?? {});
+										}
+
+										if (chat) {
+											console.log(chat);
+											if (chat.folder_id) {
+												const res = await updateChatFolderIdById(
+													localStorage.token,
+													chat.id,
+													null
+												).catch((error) => {
+													toast.error(error);
+													return null;
+												});
+											}
+
+											if (!chat.pinned) {
+												const res = await toggleChatPinnedStatusById(localStorage.token, chat.id);
+											}
+
+											initChatList();
+										}
+									}
+								}}
+								name={$i18n.t('Pinned')}
+							>
+								<div
+									class="ml-3 pl-1 mt-[1px] flex flex-col overflow-y-auto scrollbar-hidden border-s border-gray-100 dark:border-gray-900"
+								>
+									{#each $pinnedChats as chat, idx}
+										<ChatItem
+											className=""
+											id={chat.id}
+											title={chat.title}
+											{shiftKey}
+											selected={selectedChatId === chat.id}
+											on:select={() => {
+												selectedChatId = chat.id;
+											}}
+											on:unselect={() => {
+												selectedChatId = null;
+											}}
+											on:change={async () => {
+												initChatList();
+											}}
+											on:tag={(e) => {
+												const { type, name } = e.detail;
+												tagEventHandler(type, name, chat.id);
+											}}
+										/>
+									{/each}
+								</div>
+							</Folder>
+						</div>
+					{/if} -->
+
+					<!-- {#if !search && folders}
+						<Folders
+							{folders}
+							on:import={(e) => {
+								const { folderId, items } = e.detail;
+								importChatHandler(items, false, folderId);
+							}}
+							on:update={async (e) => {
+								initChatList();
+							}}
+							on:change={async () => {
+								initChatList();
 							}}
 						/>
-					{/each}
-				</Folder>
-			{/if} -->
+					{/if} -->
 
-			<Folder
-    collapsible={!search}
-    className="px-2 mt-0.5"
-    name="Kelas Saya"
-    onAddLabel="New Group Class"
->
-    {#if groups.length === 0}
-        <div class="text-center text-gray-500 py-4 text-sm">
-            No groups available
-        </div>
-    {:else}
-        <div class="flex flex-col">
-            {#each groups as group (group.id)}
-                <div class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800">
-                    <!-- Group Name -->
-                    <div class="flex-1 text-gray-900 dark:text-gray-200 truncate">
-                        {group.name}
-                    </div>
+					<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
+						<div class="pt-2.5">
+							{#if $chats}
+								{#each $chats as chat, idx}
+									{#if idx === 0 || (idx > 0 && chat.time_range !== $chats[idx - 1].time_range)}
+										<div
+											class="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium {idx ===
+											0
+												? ''
+												: 'pt-5'} pb-1.5"
+										>
+											{$i18n.t(chat.time_range)}
+											<!-- localisation keys for time_range to be recognized from the i18next parser (so they don't get automatically removed):
+								{$i18n.t('Today')}
+								{$i18n.t('Yesterday')}
+								{$i18n.t('Previous 7 days')}
+								{$i18n.t('Previous 30 days')}
+								{$i18n.t('January')}
+								{$i18n.t('February')}
+								{$i18n.t('March')}
+								{$i18n.t('April')}
+								{$i18n.t('May')}
+								{$i18n.t('June')}
+								{$i18n.t('July')}
+								{$i18n.t('August')}
+								{$i18n.t('September')}
+								{$i18n.t('October')}
+								{$i18n.t('November')}
+								{$i18n.t('December')}
+								-->
+										</div>
+									{/if}
 
-                    <!-- Context Menu -->
-                    <div class="relative">
-                        <button
-                            class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
-                            on:click|stopPropagation={() => toggleMenu(group.id)}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
-                            </svg>
-                        </button>
-
-                        {#if activeMenuId === group.id}
-                            <div class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black ring-opacity-5">
-                                <div class="py-1">
-                                    <button
-                                        class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                        on:click|stopPropagation={() => handleEditGroup(group.id)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                        on:click|stopPropagation={() => handleDeleteGroup(group.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        {/if}
-                    </div>
-                </div>
-            {/each}
-        </div>
-    {/if}
-</Folder>
-
-			<Folder
-				collapsible={!search}
-				className="px-2 mt-0.5"
-				name={$i18n.t('Chat Saya')}
-				onAdd={() => {
-					createFolder();
-				}}
-				onAddLabel={$i18n.t('New Folder')}
-				on:import={(e) => {
-					importChatHandler(e.detail);
-				}}
-				on:drop={async (e) => {
-					const { type, id, item } = e.detail;
-
-					if (type === 'chat') {
-						let chat = await getChatById(localStorage.token, id).catch((error) => {
-							return null;
-						});
-						if (!chat && item) {
-							chat = await importChat(localStorage.token, item.chat, item?.meta ?? {});
-						}
-
-						if (chat) {
-							console.log(chat);
-							if (chat.folder_id) {
-								const res = await updateChatFolderIdById(localStorage.token, chat.id, null).catch(
-									(error) => {
-										toast.error(error);
-										return null;
-									}
-								);
-							}
-
-							if (chat.pinned) {
-								const res = await toggleChatPinnedStatusById(localStorage.token, chat.id);
-							}
-
-							initChatList();
-						}
-					} else if (type === 'folder') {
-						if (folders[id].parent_id === null) {
-							return;
-						}
-
-						const res = await updateFolderParentIdById(localStorage.token, id, null).catch(
-							(error) => {
-								toast.error(error);
-								return null;
-							}
-						);
-
-						if (res) {
-							await initFolders();
-						}
-					}
-				}}
-			>
-				<!-- {#if $temporaryChatEnabled}
-					<div class="absolute z-40 w-full h-full flex justify-center"></div>
-				{/if} -->
-
-				<!-- {#if !search && $pinnedChats.length > 0}
-					<div class="flex flex-col space-y-1 rounded-xl">
-						<Folder
-							className=""
-							bind:open={showPinnedChat}
-							on:change={(e) => {
-								localStorage.setItem('showPinnedChat', e.detail);
-								console.log(e.detail);
-							}}
-							on:import={(e) => {
-								importChatHandler(e.detail, true);
-							}}
-							on:drop={async (e) => {
-								const { type, id, item } = e.detail;
-
-								if (type === 'chat') {
-									let chat = await getChatById(localStorage.token, id).catch((error) => {
-										return null;
-									});
-									if (!chat && item) {
-										chat = await importChat(localStorage.token, item.chat, item?.meta ?? {});
-									}
-
-									if (chat) {
-										console.log(chat);
-										if (chat.folder_id) {
-											const res = await updateChatFolderIdById(
-												localStorage.token,
-												chat.id,
-												null
-											).catch((error) => {
-												toast.error(error);
-												return null;
-											});
-										}
-
-										if (!chat.pinned) {
-											const res = await toggleChatPinnedStatusById(localStorage.token, chat.id);
-										}
-
-										initChatList();
-									}
-								}
-							}}
-							name={$i18n.t('Pinned')}
-						>
-							<div
-								class="ml-3 pl-1 mt-[1px] flex flex-col overflow-y-auto scrollbar-hidden border-s border-gray-100 dark:border-gray-900"
-							>
-								{#each $pinnedChats as chat, idx}
 									<ChatItem
 										className=""
 										id={chat.id}
@@ -827,109 +1023,35 @@
 										}}
 									/>
 								{/each}
-							</div>
-						</Folder>
-					</div>
-				{/if} -->
 
-				<!-- {#if !search && folders}
-					<Folders
-						{folders}
-						on:import={(e) => {
-							const { folderId, items } = e.detail;
-							importChatHandler(items, false, folderId);
-						}}
-						on:update={async (e) => {
-							initChatList();
-						}}
-						on:change={async () => {
-							initChatList();
-						}}
-					/>
-				{/if} -->
-
-				<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
-					<div class="pt-2.5">
-						{#if $chats}
-							{#each $chats as chat, idx}
-								{#if idx === 0 || (idx > 0 && chat.time_range !== $chats[idx - 1].time_range)}
-									<div
-										class="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium {idx ===
-										0
-											? ''
-											: 'pt-5'} pb-1.5"
+								{#if $scrollPaginationEnabled && !allChatsLoaded}
+									<Loader
+										on:visible={(e) => {
+											if (!chatListLoading) {
+												loadMoreChats();
+											}
+										}}
 									>
-										{$i18n.t(chat.time_range)}
-										<!-- localisation keys for time_range to be recognized from the i18next parser (so they don't get automatically removed):
-							{$i18n.t('Today')}
-							{$i18n.t('Yesterday')}
-							{$i18n.t('Previous 7 days')}
-							{$i18n.t('Previous 30 days')}
-							{$i18n.t('January')}
-							{$i18n.t('February')}
-							{$i18n.t('March')}
-							{$i18n.t('April')}
-							{$i18n.t('May')}
-							{$i18n.t('June')}
-							{$i18n.t('July')}
-							{$i18n.t('August')}
-							{$i18n.t('September')}
-							{$i18n.t('October')}
-							{$i18n.t('November')}
-							{$i18n.t('December')}
-							-->
-									</div>
+										<div
+											class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
+										>
+											<Spinner className=" size-4" />
+											<div class=" ">Loading...</div>
+										</div>
+									</Loader>
 								{/if}
-
-								<ChatItem
-									className=""
-									id={chat.id}
-									title={chat.title}
-									{shiftKey}
-									selected={selectedChatId === chat.id}
-									on:select={() => {
-										selectedChatId = chat.id;
-									}}
-									on:unselect={() => {
-										selectedChatId = null;
-									}}
-									on:change={async () => {
-										initChatList();
-									}}
-									on:tag={(e) => {
-										const { type, name } = e.detail;
-										tagEventHandler(type, name, chat.id);
-									}}
-								/>
-							{/each}
-
-							{#if $scrollPaginationEnabled && !allChatsLoaded}
-								<Loader
-									on:visible={(e) => {
-										if (!chatListLoading) {
-											loadMoreChats();
-										}
-									}}
-								>
-									<div
-										class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
-									>
-										<Spinner className=" size-4" />
-										<div class=" ">Loading...</div>
-									</div>
-								</Loader>
+							{:else}
+								<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
+									<Spinner className=" size-4" />
+									<div class=" ">Loading...</div>
+								</div>
 							{/if}
-						{:else}
-							<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
-								<Spinner className=" size-4" />
-								<div class=" ">Loading...</div>
-							</div>
-						{/if}
+						</div>
 					</div>
-				</div>
-			</Folder>
-		</div>
-<!-- admin panel -->
+				</Folder>
+			</div>
+		{/if}
+		<!-- admin panel -->
 		<!-- <div class="px-2">
 			<div class="flex flex-col font-primary">
 				{#if $user !== undefined}

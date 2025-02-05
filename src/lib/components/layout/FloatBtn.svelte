@@ -10,7 +10,7 @@
 	let showShortcuts = false;
 </script>
 
-<div class=" hidden lg:flex absolute bottom-10 right-10 z-20">
+<div class=" hidden lg:flex absolute bottom-5 right-5 z-20">
 	<button
 		id="show-shortcuts-button"
 		class="hidden"
