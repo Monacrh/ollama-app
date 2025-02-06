@@ -47,6 +47,7 @@
 	import ArchivedChatsModal from './Sidebar/ArchivedChatsModal.svelte';
 	import UserMenu from './Sidebar/UserMenu.svelte';
 	import ChatItem from './Sidebar/ChatItem.svelte';
+	import MemberItem from './Sidebar/MemberItem.svelte';
 	import Spinner from '../common/Spinner.svelte';
 	import Loader from '../common/Loader.svelte';
 	import AddFilesPlaceholder from '../AddFilesPlaceholder.svelte';
@@ -547,11 +548,10 @@
 			<a
 				id="sidebar-new-chat-button"
 				class="flex justify-between items-center flex-1 rounded-lg px-2 py-1 h-full text-right hover:bg-gray-100 dark:hover:bg-gray-900 transition"
-				href="/"
+				href="/telyu"
 				draggable="false"
 				on:click={async () => {
 					selectedChatId = null;
-					await goto('/telyu');
 					const newChatButton = document.getElementById('new-chat-button');
 					setTimeout(() => {
 						newChatButton?.click();
@@ -647,82 +647,28 @@
 				? 'opacity-20'
 				: ''}"
 		>
-			<p class="px-2 mt-0.5 w-full pt-2.5 text-xl text-gray-500 dark:text-gray-200">
+			<p class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200">
 				{group.name}
 			</p>
 			<!-- Daftar nama anggota -->
 			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
 				<!-- Cari anggota -->
 				<div class="pt-2.5">
-					{#if $usersInGroup}
-						{#each $usersInGroup as idx, user_ids}
-							<div>
-								{idx}
-							</div>
-							<div>
-								{user_ids}
-							</div>
-						{/each}
-					{/if}
-					<!-- {#if $chats} -->
-						<!-- {#each $chats as chat, idx}
-							{#if idx === 0 || (idx > 0 && chat.time_range !== $chats[idx - 1].time_range)}
-								<div
-									class="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium {idx ===
-									0
-										? ''
-										: 'pt-5'} pb-1.5"
-								>
-									{$i18n.t(chat.time_range)}
-								</div>
-							{/if}
-
-							<ChatItem
+					{#if group || group.user_ids}
+						<!-- {#each group.user_ids as idx} -->
+							<MemberItem
 								className=""
-								id={chat.id}
-								title={chat.title}
-								{shiftKey}
-								selected={selectedChatId === chat.id}
-								on:select={() => {
-									selectedChatId = chat.id;
-								}}
-								on:unselect={() => {
-									selectedChatId = null;
-								}}
-								on:change={async () => {
-									initChatList();
-								}}
-								on:tag={(e) => {
-									const { type, name } = e.detail;
-									tagEventHandler(type, name, chat.id);
-								}}
+								id={"idx"}
+								name={"User Name"}
+								email={"User Email"}
 							/>
-						{/each} -->
-
-						<!-- Digunakan untuk meload semua mahasiswa -->
-						<!-- {#if $scrollPaginationEnabled && !allChatsLoaded}
-							<Loader
-								on:visible={(e) => {
-									if (!chatListLoading) {
-										loadMoreChats();
-									}
-								}}
-							>
-								<div
-									class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
-								>
-									<Spinner className=" size-4" />
-									<div class=" ">Loading...</div>
-								</div>
-							</Loader>
-						{/if} -->
-					<!-- {:else}
+						<!-- {/each} -->
+					{:else}
 						<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
 							<Spinner className=" size-4" />
 							<div class=" ">Loading...</div>
 						</div>
-					{/if} -->
-					Daftar semua mahasiswa
+					{/if}
 				</div>
 			</div>
 		</div>
