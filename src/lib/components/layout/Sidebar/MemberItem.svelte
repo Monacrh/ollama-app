@@ -2,6 +2,8 @@
 	import { toast } from 'svelte-sonner';
 	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import { onMount, getContext, createEventDispatcher, tick, onDestroy } from 'svelte';
+
+    import { getUserById } from '$lib/apis/users';
 	const i18n = getContext('i18n');
 
 	const dispatch = createEventDispatcher();
@@ -18,7 +20,7 @@
 
 	export let id;
     export let name;
-	export let email;
+    export let email;
 
 	export let selected = false;
 	export let shiftKey = false;
@@ -28,8 +30,8 @@
 	let mouseOver = false;
 	let draggable = false;
 
-    let username = name;
-	let useremail = email;
+    let username;
+	let useremail;
 
 
 	let itemElement;
@@ -74,6 +76,13 @@
 		itemElement.style.opacity = '1'; // Reset visual cue after drag
 		dragged = false;
 	};
+
+    onMount(() => {
+        if (id) {
+            username = name;
+            useremail = email;
+        }
+    })
 
 	onMount(() => {
 		if (itemElement) {

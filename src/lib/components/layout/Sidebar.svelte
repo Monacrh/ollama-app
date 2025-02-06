@@ -62,11 +62,13 @@
 	import PencilSquare from '../icons/PencilSquare.svelte';
 	import {getGroups} from '$lib/apis/groups';
 	import FloatBtn from './FloatBtn.svelte';
+	import { getUsers } from '$lib/apis/users';
 
 	const BREAKPOINT = 768;
 
 	let groups = [];
 	let group = {};
+	let users = [];
 
 	let navElement;
 	let search = '';
@@ -135,7 +137,7 @@
 		if ($page.url.pathname.includes('telyu/g')) {
 			try {
 				group = await getGroupById(localStorage.token, $page.params.id);
-				console.log(group);
+				users = await getUsers(localStorage.token);
 			} catch (error) {
 				toast.error(error);
 			}
@@ -654,15 +656,16 @@
 			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
 				<!-- Cari anggota -->
 				<div class="pt-2.5">
-					{#if group || group.user_ids}
+					{#if group}
 						<!-- {#each group.user_ids as idx} -->
+						 {#each users as user}
 							<MemberItem
 								className=""
-								id={"idx"}
-								name={"User Name"}
-								email={"User Email"}
+								id={"54aeeeca-52b9-471b-ada8-e9582c98ca6c"}
+								name={user.name}
+								email={user.email}
 							/>
-						<!-- {/each} -->
+						{/each}
 					{:else}
 						<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
 							<Spinner className=" size-4" />
