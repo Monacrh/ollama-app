@@ -68,7 +68,7 @@
 
 	let groups = [];
 	let group = {};
-	let users = {};
+	let users = [];
 
 	let navElement;
 	let search = '';
@@ -88,6 +88,9 @@
 	let folders = {};
 
 	let activeMenuId = null;
+
+	let sortKey = 'created_at';
+	let sortOrder = 'asc';
     
     const toggleMenu = (groupId) => {
         activeMenuId = activeMenuId === groupId ? null : groupId;
@@ -126,7 +129,6 @@
 			try {
 				users = await getUsersInGroup(localStorage.token, $page.params.id);
 				users = users.users;
-				console.log(users);
 			} catch (error) {
 				toast.error(error);
 			}
@@ -149,7 +151,7 @@
         await setGroups();
 		await setGroupById();
 		await setUserInGroups();
-    });
+	});
 
 	const initFolders = async () => {
 		const folderList = await getFolders(localStorage.token).catch((error) => {
@@ -469,6 +471,25 @@
 		dropZone?.removeEventListener('drop', onDrop);
 		dropZone?.removeEventListener('dragleave', onDragLeave);
 	});
+
+	let filteredUsers;
+
+	$: filteredUsers = users
+		.filter((user) => {
+			if (search === '') {
+				return true;
+			} else {
+				let name = user.name.toLowerCase();
+				const query = search.toLowerCase();
+				console.log(`${name} is`,name.includes(query));
+				return name.includes(query);
+			}
+		})
+		.sort((a, b) => {
+			if (a[sortKey] < b[sortKey]) return sortOrder === 'asc' ? -1 : 1;
+			if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
+			return 0;
+		});
 </script>
 
 <!-- <ArchivedChatsModal
@@ -654,11 +675,38 @@
 			</p>
 			<!-- Daftar nama anggota -->
 			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
+				
 				<!-- Cari anggota -->
+				<div class="flex gap-1">
+					<Tooltip content={$i18n.t('Cari Nama/Email')}>
+						<div class="flex flex-1">
+							<div class=" self-center ml-1 mr-3">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</div>
+							<input
+								class=" w-full text-sm pr-4 py-1 rounded-r-xl outline-none bg-transparent"
+								bind:value={search}
+								type="text"
+								placeholder={$i18n.t('Cari Nama/Email')}
+							/>
+						</div>
+					</Tooltip>
+				</div>
 				<div class="pt-2.5">
-					{#if group && users !== undefined}
+					{#if group && filteredUsers !== undefined}
 						<!-- {#each group.user_ids as idx} -->
-						 {#each users as user}
+						 {#each filteredUsers as user}
 							<MemberItem
 								className=""
 								id={user.id}
@@ -674,7 +722,7 @@
 					{/if}
 				</div>
 			</div>
-		</div>
+			</div>
 		{:else}
 			<div
 				class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
