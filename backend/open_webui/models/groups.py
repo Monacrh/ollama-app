@@ -1,4 +1,3 @@
-import json
 import logging
 import time
 from typing import Optional
@@ -9,6 +8,7 @@ from open_webui.internal.db import Base, get_db
 from open_webui.env import SRC_LOG_LEVELS
 
 from open_webui.models.files import FileMetadataResponse
+from open_webui.models.users import (Users, UserModel)
 
 
 from pydantic import BaseModel, ConfigDict
@@ -85,7 +85,7 @@ class GroupAllUserNotIn(BaseModel):
 class GroupAllUserIn(BaseModel):
     id: str
     user_id: str
-    user_ids: list[str] = []
+    users: list[UserModel] = []
 
 
 class GroupForm(BaseModel):
@@ -179,11 +179,17 @@ class GroupTable:
     
     def get_group_users_in(self, id: str) -> Optional[GroupAllUserIn]:
         group = self.get_group_by_id(id)
+        users = []
         if group:
+            for uid in group.user_ids:
+                user = Users.get_user_by_id(uid)
+                print(user)
+                users.append(user)
+                
             return GroupAllUserIn(
                 id=group.id,
                 user_id=group.user_id,
-                user_ids=group.user_ids,
+                users=users,
             )
         else:
             return None

@@ -68,7 +68,7 @@
 
 	let groups = [];
 	let group = {};
-	let users = [];
+	let users = {};
 
 	let navElement;
 	let search = '';
@@ -124,9 +124,9 @@
 	const setUserInGroups = async () => {
 		if ($page.url.pathname.includes('telyu/g')) {
 			try {
-				usersInGroup.set(await getUsersInGroup(localStorage.token, $page.params.id).then((res) => {
-					return res;
-				}));
+				users = await getUsersInGroup(localStorage.token, $page.params.id);
+				users = users.users;
+				console.log(users);
 			} catch (error) {
 				toast.error(error);
 			}
@@ -137,7 +137,7 @@
 		if ($page.url.pathname.includes('telyu/g')) {
 			try {
 				group = await getGroupById(localStorage.token, $page.params.id);
-				users = await getUsers(localStorage.token);
+				// users = await getUsers(localStorage.token);
 			} catch (error) {
 				toast.error(error);
 			}
@@ -147,8 +147,8 @@
     // Load groups on component mount
     onMount(async () => {
         await setGroups();
-		await setUserInGroups();
 		await setGroupById();
+		await setUserInGroups();
     });
 
 	const initFolders = async () => {
@@ -656,12 +656,12 @@
 			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
 				<!-- Cari anggota -->
 				<div class="pt-2.5">
-					{#if group}
+					{#if group && users !== undefined}
 						<!-- {#each group.user_ids as idx} -->
 						 {#each users as user}
 							<MemberItem
 								className=""
-								id={"54aeeeca-52b9-471b-ada8-e9582c98ca6c"}
+								id={user.id}
 								name={user.name}
 								email={user.email}
 							/>
