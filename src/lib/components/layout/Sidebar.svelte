@@ -72,7 +72,7 @@
 
 	let navElement;
 	let search = '';
-	
+
 	let sortKey = 'created_at';
 	let sortOrder = 'asc';
 
@@ -83,15 +83,12 @@
 			if (search === '') {
 				return true;
 			} else {
-				let name = user.name.toLowerCase();
+				const name = user.name.toLowerCase();
 				const query = search.toLowerCase();
-				return name.includes(query);
+				const isIncluded = name.includes(query);
+				console.log(`${query} included? ${isIncluded}`);
+				return isIncluded;
 			}
-		})
-		.sort((a, b) => {
-			if (a[sortKey] < b[sortKey]) return sortOrder === 'asc' ? -1 : 1;
-			if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
-			return 0;
 		});
 
 	let shiftKey = false;
@@ -703,8 +700,8 @@
 					</Tooltip>
 				</div>
 				<div class="pt-2.5">
-					{#if group && filteredUsers !== undefined}
-						 {#each filteredUsers as user}
+					{#if group && filteredUsers.length > 0}
+						 {#each filteredUsers as user(user.id)}
 							<MemberItem
 								className=""
 								id={user.id}
@@ -713,9 +710,8 @@
 							/>
 						{/each}
 					{:else}
-						<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
-							<Spinner className=" size-4" />
-							<div class=" ">Loading...</div>
+						<div class="text-lg font-medium">
+							Belum ada anggota, silahkan tambahkan anggota
 						</div>
 					{/if}
 				</div>
