@@ -72,6 +72,27 @@
 
 	let navElement;
 	let search = '';
+	
+	let sortKey = 'created_at';
+	let sortOrder = 'asc';
+
+	let filteredUsers;
+
+	$: filteredUsers = users
+		.filter((user) => {
+			if (search === '') {
+				return true;
+			} else {
+				let name = user.name.toLowerCase();
+				const query = search.toLowerCase();
+				return name.includes(query);
+			}
+		})
+		.sort((a, b) => {
+			if (a[sortKey] < b[sortKey]) return sortOrder === 'asc' ? -1 : 1;
+			if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
+			return 0;
+		});
 
 	let shiftKey = false;
 
@@ -89,9 +110,6 @@
 
 	let activeMenuId = null;
 
-	let sortKey = 'created_at';
-	let sortOrder = 'asc';
-    
     const toggleMenu = (groupId) => {
         activeMenuId = activeMenuId === groupId ? null : groupId;
     };
@@ -127,8 +145,8 @@
 	const setUserInGroups = async () => {
 		if ($page.url.pathname.includes('telyu/g')) {
 			try {
-				users = await getUsersInGroup(localStorage.token, $page.params.id);
-				users = users.users;
+				let tempUsers = await getUsersInGroup(localStorage.token, $page.params.id);
+				users = tempUsers.users;
 			} catch (error) {
 				toast.error(error);
 			}
@@ -471,24 +489,6 @@
 		dropZone?.removeEventListener('drop', onDrop);
 		dropZone?.removeEventListener('dragleave', onDragLeave);
 	});
-
-	let filteredUsers;
-
-	$: filteredUsers = users
-		.filter((user) => {
-			if (search === '') {
-				return true;
-			} else {
-				let name = user.name.toLowerCase();
-				const query = search.toLowerCase();
-				return name.includes(query);
-			}
-		})
-		.sort((a, b) => {
-			if (a[sortKey] < b[sortKey]) return sortOrder === 'asc' ? -1 : 1;
-			if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
-			return 0;
-		});
 </script>
 
 <!-- <ArchivedChatsModal
