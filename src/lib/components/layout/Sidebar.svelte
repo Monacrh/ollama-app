@@ -481,7 +481,6 @@
 			} else {
 				let name = user.name.toLowerCase();
 				const query = search.toLowerCase();
-				console.log(`${name} is`,name.includes(query));
 				return name.includes(query);
 			}
 		})
@@ -705,7 +704,6 @@
 				</div>
 				<div class="pt-2.5">
 					{#if group && filteredUsers !== undefined}
-						<!-- {#each group.user_ids as idx} -->
 						 {#each filteredUsers as user}
 							<MemberItem
 								className=""
@@ -820,7 +818,7 @@
 					onAdd={() => {
 						createFolder();
 					}}
-					onAddLabel={$i18n.t('New Folder')}
+					onAddLabel={$i18n.t('Chat Saya')}
 					on:import={(e) => {
 						importChatHandler(e.detail);
 					}}
