@@ -6,6 +6,8 @@ import type { Socket } from 'socket.io-client';
 
 import emojiShortCodes from '$lib/emoji-shortcodes.json';
 
+export const showCreateGroup = writable(false);
+
 // Backend
 export const WEBUI_NAME = writable(APP_NAME);
 export const config: Writable<Config | undefined> = writable(undefined);

@@ -10,6 +10,8 @@
 	import Lifebuoy from '$lib/components/icons/Lifebuoy.svelte';
 	import Keyboard from '$lib/components/icons/Keyboard.svelte';
 	import { goto } from '$app/navigation';
+	import { showCreateGroup } from '$lib/stores/index.ts';
+
 	const i18n = getContext('i18n');
 
 	export let onClose: Function = () => {};
@@ -32,11 +34,11 @@
 			align="end"
 			transition={flyAndScale}
 		>
-			<DropdownMenu.Item
+				<DropdownMenu.Item
 				class="flex gap-2 items-center px-3 py-2 text-sm  cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
 				id="chat-share-button"
-				on:click={async () => {
-					await goto('/telyu/admin/groups');
+				on:click={() => {
+					showCreateGroup.set(true);
 				}}
 			>
 				<div class="flex items-center">{$i18n.t('Buat Kelas')}</div>
