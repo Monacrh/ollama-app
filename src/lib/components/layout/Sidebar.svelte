@@ -3,7 +3,6 @@
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { page } from '$app/stores';
-	import { usersInGroup } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import {
 		user,
@@ -21,7 +20,9 @@
 		temporaryChatEnabled,
 		channels,
 		socket,
-		config
+		config,
+		group,
+		usersInGroup
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -62,34 +63,37 @@
 	import PencilSquare from '../icons/PencilSquare.svelte';
 	import {getGroups} from '$lib/apis/groups';
 	import FloatBtn from './FloatBtn.svelte';
-	import { getUsers } from '$lib/apis/users';
 
 	const BREAKPOINT = 768;
 
 	let groups = [];
-	let group = {};
-	let users = [];
 
 	let navElement;
 	let search = '';
 
-	let sortKey = 'created_at';
-	let sortOrder = 'asc';
-
 	let filteredUsers;
 
-	$: filteredUsers = users
-		.filter((user) => {
-			if (search === '') {
-				return true;
-			} else {
-				const name = user.name.toLowerCase();
-				const query = search.toLowerCase();
-				const isIncluded = name.includes(query);
-				console.log(`${query} included? ${isIncluded}`);
-				return isIncluded;
-			}
-		});
+	$: {
+		console.log('usersInGroup', $usersInGroup);
+		console.log('usersInGroup.users', $usersInGroup.users);
+		if (Array.isArray($usersInGroup.users)) {
+			filteredUsers = $usersInGroup.users
+				.filter((user) => {
+					if (search === '') {
+						return true;
+					} else {
+						const name = user.name.toLowerCase();
+						const query = search.toLowerCase();
+						const isIncluded = name.includes(query);
+						console.log(`${query} included? ${isIncluded}`);
+						return isIncluded;
+					}
+				});
+		} else {
+			console.error('usersInGroup.users is not an array');
+            filteredUsers = [];
+		}
+	}
 
 	let shiftKey = false;
 
@@ -139,33 +143,9 @@
         }
     };
 
-	const setUserInGroups = async () => {
-		if ($page.url.pathname.includes('telyu/g')) {
-			try {
-				let tempUsers = await getUsersInGroup(localStorage.token, $page.params.id);
-				users = tempUsers.users;
-			} catch (error) {
-				toast.error(error);
-			}
-		}
-	};
-
-	const setGroupById = async () => {
-		if ($page.url.pathname.includes('telyu/g')) {
-			try {
-				group = await getGroupById(localStorage.token, $page.params.id);
-				// users = await getUsers(localStorage.token);
-			} catch (error) {
-				toast.error(error);
-			}
-		}
-	}
-
     // Load groups on component mount
     onMount(async () => {
         await setGroups();
-		await setGroupById();
-		await setUserInGroups();
 	});
 
 	const initFolders = async () => {
@@ -667,7 +647,7 @@
 				: ''}"
 		>
 			<p class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200">
-				{group.name}
+				{$group.name}
 			</p>
 			<!-- Daftar nama anggota -->
 			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
@@ -700,13 +680,14 @@
 					</Tooltip>
 				</div>
 				<div class="pt-2.5">
-					{#if group && filteredUsers.length > 0}
+					{#if $group && filteredUsers.length > 0}
 						 {#each filteredUsers as user(user.id)}
 							<MemberItem
 								className=""
 								id={user.id}
 								name={user.name}
 								email={user.email}
+								groupId={$group.id}
 							/>
 						{/each}
 					{:else}
