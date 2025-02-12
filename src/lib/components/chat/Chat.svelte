@@ -81,8 +81,17 @@
 	import EventConfirmDialog from '../common/ConfirmDialog.svelte';
 	import Placeholder from './Placeholder.svelte';
 	import NotificationToast from '../NotificationToast.svelte';
+	import { writable } from 'svelte/store';
+	import { showWelcomeScreen } from '$lib/stores'
+	
 
 	export let chatIdProp = '';
+
+	// const showWelcomeScreen = writable(
+	// 	typeof localStorage !== 'undefined' 
+	// 		? localStorage.getItem('firstVisit') === null
+	// 		: true
+	// );
 
 	let loaded = false;
 	const eventTarget = new EventTarget();
@@ -1865,33 +1874,44 @@
 		/>
 
 		<!-- Welcome Screen -->
-		{#if !$chatId && createMessagesList(history.currentId).length === 0}
-			<div class="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-900 z-10">
-				<div class="flex flex-col items-center justify-center h-full w-full">
-					<!-- Logo -->
-					<div class="animate-float mb-4">
-						<img 
-							src="/static/telu.png" 
-							class="w-48 h-48 mx-auto object-contain"
-							alt="Ollama Logo"
-							crossorigin="anonymous"
-							loading="eager"
-						/>
-					</div>
-
-					<!-- Text at Bottom -->
-					<div class="flex-0 pb-12 text-center">
-						<h1 class="text-2xl font-semibold text-gray-700 dark:text-gray-300">
-						  Selamat Datang di PROJECT OLLAMA Universitas Telkom.
-						</h1>
-					</div>
-				</div>
+		{#if $showWelcomeScreen}
+	<div class="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-900 z-10">
+		<div class="flex flex-col items-center justify-center h-full w-full">
+			<!-- Logo -->
+			<div class="animate-float mb-4">
+				<img 
+					src="/telkom.png" 
+					class="w-48 h-48 mx-auto object-contain"
+					alt="Ollama Logo"
+					crossorigin="anonymous"
+					loading="eager"
+					style="background-color: transparent;"
+				/>
 			</div>
-		{/if}
+
+			<!-- Text at Bottom -->
+			<div class="flex-0 pb-12 text-center">
+				<h1 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
+					Selamat Datang di PROJECT OLLAMA Universitas Telkom.
+				</h1>
+				<button
+					on:click={() => {
+						$showWelcomeScreen = false;
+						localStorage.setItem('firstVisit', 'completed');
+						initNewChat();
+					}}
+					class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+				>
+					Get Started
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 		<!-- Chat Interface (only shows when not in welcome screen) -->
-		{#if $chatId || createMessagesList(history.currentId).length > 0}
-			<PaneGroup direction="horizontal" class="w-full h-full">
+		{#if !$showWelcomeScreen}
+		<PaneGroup direction="horizontal" class="w-full h-full">
 				<Pane defaultSize={50} class="h-full flex w-full relative">
 					{#if $banners.length > 0 && !history.currentId && !$chatId && selectedModels.length <= 1}
 						<div class="absolute top-12 left-0 right-0 w-full z-30">

@@ -66,9 +66,21 @@
 	import { showCreateGroup } from '$lib/stores';
 	import { createNewGroup} from '$lib/apis/groups';
 	import AddGroup from './AddGroup.svelte';
+	import { showWelcomeScreen } from '$lib/stores'
 
 
 	const BREAKPOINT = 768;
+
+	// (only a dumb chat, feel free to delete it)
+	const createSimpleChat = async (user_id) => {
+    return {
+        id: uuidv4(),
+        name: 'Simple Chat',
+        messages: [],
+        is_dumb: true,
+        created_at: new Date().toISOString()
+    };
+};
 
 	let groups = [];
 	let group = {};
@@ -114,9 +126,15 @@
 
 	let activeMenuId = null;
 
-	const gotoGroupPage = (groupId: string) => {
-    	goto(`/admin/users/editusers/{groupId}`);
-	};
+	// const gotoGroupPage = (groupId: string) => {
+    // 	goto(`/admin/users/editusers/{groupId}`);
+	// 	goto('/admin/users/editusers');
+
+	// };
+
+	function gotoGroupPage() {
+		goto('/chat'); // Navigates to the Users page
+	}
 
     const toggleMenu = (groupId) => {
         activeMenuId = activeMenuId === groupId ? null : groupId;
@@ -604,6 +622,9 @@
 						if ($mobile) {
 							showSidebar.set(false);
 						}
+						// Dismiss welcome screen
+						$showWelcomeScreen = false;
+            			localStorage.setItem('firstVisit', 'completed');
 					}, 0);
 				}}
 			>
@@ -719,89 +740,102 @@
 			</Folder>
 		{/if} -->
 		<Folder
-collapsible={!search}
-className="px-2 mt-0.5"
-name="Kelas Saya"
-onAddLabel="New Group Class"
->
-{#if groups.length === 0}
-	<div class="text-center text-gray-500 py-4 text-sm">
-		No groups available
-	</div>
-{:else}
-<div class="flex flex-col">
-	{#each groups as group (group.id)}
-		<div 
-			class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800"
-			on:click={() => gotoGroupPage(group.id)}
-			role="button"
-			tabindex="0"
-			on:keydown={(e) => ['Enter', ' '].includes(e.key) && gotoGroupPage(group.id)}
-			aria-label="View {group.name} details"
-		>
-			<!-- Group Name -->
-			<div class="flex-1 text-gray-900 dark:text-gray-200 truncate">
-				{group.name}
-			</div>
-
-			<!-- Context Menu -->
-			<div class="relative">
-				<button
-					class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
-					on:click|stopPropagation={() => toggleMenu(group.id)}
-					aria-label="Open actions menu for {group.name}"
-					aria-haspopup="true"
-					aria-expanded={activeMenuId === group.id}
-					data-group={group.id}
-				>
-					<svg 
-						xmlns="http://www.w3.org/2000/svg" 
-						class="h-5 w-5 text-gray-500" 
-						fill="none" 
-						viewBox="0 0 24 24" 
-						stroke="currentColor"
-						aria-hidden="true"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
-					</svg>
-				</button>
-
-				{#if activeMenuId === group.id}
+			collapsible={!search}
+			className="px-2 mt-0.5"
+			name="Kelas Saya"
+			onAddLabel="New Group Class"
+			>
+			{#if groups.length === 0}
+				<div class="text-center text-gray-500 py-4 text-sm">
+					No groups available
+				</div>
+			{:else}
+			<div class="flex flex-col">
+				{#each groups as group (group.id)}
 					<div 
-						class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black ring-opacity-5"
-						role="menu"
-						aria-orientation="vertical"
-						data-menu={group.id}
+						class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800"
+						on:click={async () => {
+							try {
+								// Call the gotoGroupPage function (assuming it might be async)
+								await gotoGroupPage();
+						
+								// Update the Svelte store to hide the welcome screen
+								$showWelcomeScreen = false;
+						
+								// Store the first visit status in localStorage
+								localStorage.setItem('firstVisit', 'completed');
+							} catch (error) {
+								console.error("An error occurred during the click handler:", error);
+							}
+						}}
+						role="button"
+						tabindex="0"
+						on:keydown={(e) => ['Enter', ' '].includes(e.key) && gotoGroupPage(group.id)}
+						aria-label="View {group.name} details"
 					>
-						<div class="py-1">
+						<!-- Group Name -->
+						<div class="flex-1 text-gray-900 dark:text-gray-200 truncate">
+							{group.name}
+						</div>
+
+						<!-- Context Menu -->
+						<div class="relative">
 							<button
-								class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
-								on:click|stopPropagation={() => handleEditGroup(group.id)}
-								role="menuitem"
-								tabindex="-1"
-								on:keydown={(e) => handleMenuKeydown(e, group.id)}
+								class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
+								on:click|stopPropagation={() => toggleMenu(group.id)}
+								aria-label="Open actions menu for {group.name}"
+								aria-haspopup="true"
+								aria-expanded={activeMenuId === group.id}
+								data-group={group.id}
 							>
-								Kelolah
+								<svg 
+									xmlns="http://www.w3.org/2000/svg" 
+									class="h-5 w-5 text-gray-500" 
+									fill="none" 
+									viewBox="0 0 24 24" 
+									stroke="currentColor"
+									aria-hidden="true"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+								</svg>
 							</button>
-							<button
-								class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
-								on:click|stopPropagation={() => handleDeleteGroup(group.id)}
-								role="menuitem"
-								tabindex="-1"
-								on:keydown={(e) => handleMenuKeydown(e, group.id)}
-							>
-								Delete
-							</button>
+
+							{#if activeMenuId === group.id}
+								<div 
+									class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black ring-opacity-5"
+									role="menu"
+									aria-orientation="vertical"
+									data-menu={group.id}
+								>
+									<div class="py-1">
+										<button
+											class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+											on:click|stopPropagation={() => handleEditGroup(group.id)}
+											role="menuitem"
+											tabindex="-1"
+											on:keydown={(e) => handleMenuKeydown(e, group.id)}
+										>
+											Kelolah
+										</button>
+										<button
+											class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+											on:click|stopPropagation={() => handleDeleteGroup(group.id)}
+											role="menuitem"
+											tabindex="-1"
+											on:keydown={(e) => handleMenuKeydown(e, group.id)}
+										>
+											Delete
+										</button>
+									</div>
+								</div>
+							{/if}
 						</div>
 					</div>
-				{/if}
+				{/each}
 			</div>
-		</div>
-	{/each}
-</div>
-{/if}
-</Folder>
-{/if}
+			{/if}
+		</Folder>
+			{/if}
 
 				<!-- Chat Saya -->
 				<Folder
@@ -817,6 +851,9 @@ onAddLabel="New Group Class"
 					}}
 					on:drop={async (e) => {
 						const { type, id, item } = e.detail;
+						// Dismiss welcome screen when dropping items
+						$showWelcomeScreen = false;
+        				localStorage.setItem('firstVisit', 'completed');
 
 						if (type === 'chat') {
 							let chat = await getChatById(localStorage.token, id).catch((error) => {
