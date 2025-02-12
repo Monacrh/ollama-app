@@ -23,6 +23,9 @@
 		config,
 		group,
 		usersInGroup
+		config,
+		group,
+		usersInGroup
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -95,6 +98,27 @@
 
 	let filteredUsers;
 
+	$: {
+		console.log('usersInGroup', $usersInGroup);
+		console.log('usersInGroup.users', $usersInGroup.users);
+		if (Array.isArray($usersInGroup.users)) {
+			filteredUsers = $usersInGroup.users
+				.filter((user) => {
+					if (search === '') {
+						return true;
+					} else {
+						const name = user.name.toLowerCase();
+						const query = search.toLowerCase();
+						const isIncluded = name.includes(query);
+						console.log(`${query} included? ${isIncluded}`);
+						return isIncluded;
+					}
+				});
+		} else {
+			console.error('usersInGroup.users is not an array');
+            filteredUsers = [];
+		}
+	}
 	$: {
 		console.log('usersInGroup', $usersInGroup);
 		console.log('usersInGroup.users', $usersInGroup.users);
