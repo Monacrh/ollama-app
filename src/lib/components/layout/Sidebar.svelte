@@ -3,6 +3,7 @@
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { page } from '$app/stores';
+	import { usersInGroup } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import {
 		user,
@@ -20,9 +21,7 @@
 		temporaryChatEnabled,
 		channels,
 		socket,
-		config,
-		group,
-		usersInGroup
+		config
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -89,6 +88,9 @@
 
 	let navElement;
 	let search = '';
+
+	let sortKey = 'created_at';
+	let sortOrder = 'asc';
 
 	let filteredUsers;
 
@@ -209,9 +211,33 @@
         }
     };
 
+	const setUserInGroups = async () => {
+		if ($page.url.pathname.includes('telyu/g')) {
+			try {
+				let tempUsers = await getUsersInGroup(localStorage.token, $page.params.id);
+				users = tempUsers.users;
+			} catch (error) {
+				toast.error(error);
+			}
+		}
+	};
+
+	const setGroupById = async () => {
+		if ($page.url.pathname.includes('telyu/g')) {
+			try {
+				group = await getGroupById(localStorage.token, $page.params.id);
+				// users = await getUsers(localStorage.token);
+			} catch (error) {
+				toast.error(error);
+			}
+		}
+	}
+
     // Load groups on component mount
     onMount(async () => {
         await setGroups();
+		await setGroupById();
+		await setUserInGroups();
 	});
 
 	const initFolders = async () => {

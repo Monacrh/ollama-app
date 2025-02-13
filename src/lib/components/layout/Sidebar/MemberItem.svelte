@@ -21,7 +21,6 @@
 	export let id;
     export let name;
     export let email;
-	export let groupId;
 
 	export let selected = false;
 	export let shiftKey = false;
@@ -124,7 +123,7 @@
 <div bind:this={itemElement} class=" w-full {className} relative group" {draggable}>
 	<a
         class=" w-full flex justify-between rounded-lg px-[11px] py-[6px] bg-gray-100 dark:bg-gray-950 whitespace-nowrap text-ellipsis"
-        href="{groupId}/a/{id}"
+        href="telyu/m/{id}"
         on:click={() => {
             dispatch('select');
 

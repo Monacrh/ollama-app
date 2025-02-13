@@ -299,13 +299,7 @@
 				</div>
 			{/if}
 
-			{#if $page.params.uid}
-				<div>
-					with UID
-				</div>
-			{:else}
-				<Sidebar />
-			{/if}
+			<Sidebar />
 			<slot />
 		{/if}
 	</div>

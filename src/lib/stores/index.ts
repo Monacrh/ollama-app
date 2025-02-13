@@ -52,8 +52,7 @@ export const channels = writable([]);
 export const chats = writable([]);
 export const pinnedChats = writable([]);
 export const tags = writable([]);
-export const usersInGroup: Writable<UsersInGroup> = writable({});
-export const group: Writable<Group> = writable({});
+export const usersInGroup = writable([]);
 
 export const models: Writable<Model[]> = writable([]);
 
@@ -232,21 +231,3 @@ type SessionUser = {
 	role: string;
 	profile_image_url: string;
 };
-
-type Group = {
-	id: string;
-	name: string;
-	created_at: string;
-	updated_at: string;
-	meta: object;
-	permissions: object;
-	user_id: string;
-	user_ids: string[];
-	data: object;
-}
-
-type UsersInGroup = {
-	id: string;
-	user_id: string;
-	users: object[];
-}
