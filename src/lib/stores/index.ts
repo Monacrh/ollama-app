@@ -52,7 +52,8 @@ export const channels = writable([]);
 export const chats = writable([]);
 export const pinnedChats = writable([]);
 export const tags = writable([]);
-export const usersInGroup = writable([]);
+export const usersInGroup: Writable<UsersInGroup> = writable({});
+export const group: Writable<Group> = writable({});
 
 export const models: Writable<Model[]> = writable([]);
 
@@ -231,3 +232,54 @@ type SessionUser = {
 	role: string;
 	profile_image_url: string;
 };
+
+type Group = {
+	id: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
+	data: object;
+	permissions: object;
+	user_id: string;
+	user_ids: string[];
+};
+
+type User = {
+	id: string;
+	email: string;
+	name: string;
+	role: string;
+	profile_image_url: string;
+
+	last_active_at: string;
+	updated_at: string;
+	created_at: string;
+
+	api_key: string;
+	settings: object;
+	info: object;
+
+	oauth_sub: string;
+
+	// id = Column(String, primary_key=True)
+    // name = Column(String)
+    // email = Column(String)
+    // role = Column(String)
+    // profile_image_url = Column(Text)
+
+    // last_active_at = Column(BigInteger)
+    // updated_at = Column(BigInteger)
+    // created_at = Column(BigInteger)
+
+    // api_key = Column(String, nullable=True, unique=True)
+    // settings = Column(JSONField, nullable=True)
+    // info = Column(JSONField, nullable=True)
+
+    // oauth_sub = Column(Text, unique=True)
+}
+
+type UsersInGroup = {
+	id: string;
+	user_id: string;
+	users: User[];
+}
