@@ -88,7 +88,7 @@
 
 	let navElement;
 	let search = '';
-
+	
 	let sortKey = 'created_at';
 	let sortOrder = 'asc';
 
@@ -741,6 +741,110 @@
 				? 'opacity-20'
 				: ''}"
 		>
+			<p class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200">
+				{group.name}
+			</p>
+			<!-- Daftar nama anggota -->
+			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
+				
+				<!-- Cari anggota -->
+				<div class="flex gap-1">
+					<Tooltip content={$i18n.t('Cari Nama/Email')}>
+						<div class="flex flex-1">
+							<div class=" self-center ml-1 mr-3">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</div>
+							<input
+								class=" w-full text-sm pr-4 py-1 rounded-r-xl outline-none bg-transparent"
+								bind:value={search}
+								type="text"
+								placeholder={$i18n.t('Cari Nama/Email')}
+							/>
+						</div>
+					</Tooltip>
+				</div>
+				<div class="pt-2.5">
+					{#if group && filteredUsers !== undefined}
+						 {#each filteredUsers as user}
+							<MemberItem
+								className=""
+								id={user.id}
+								name={user.name}
+								email={user.email}
+							/>
+						{/each}
+					{:else}
+						<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
+							<Spinner className=" size-4" />
+							<div class=" ">Loading...</div>
+						</div>
+					{/if}
+				</div>
+			</div>
+			</div>
+		{:else}
+			<div
+				class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
+					? 'opacity-20'
+					: ''}"
+			>
+				<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
+					<Folder
+						className="px-2 mt-0.5"
+						name={$i18n.t('Channels')}
+						dragAndDrop={false}
+						onAdd={$user.role === 'admin'
+							? () => {
+									showCreateChannel = true;
+								}
+							: null}
+						onAddLabel={$i18n.t('Create Channel')}
+					>
+						{#each $channels as channel}
+							<ChannelItem
+								{channel}
+								onUpdate={async () => {
+									await initChannels();
+								}}
+							/>
+						{/each}
+					</Folder>
+				{/if} -->
+				
+				<!-- Kelas Saya -->
+				<Folder
+					collapsible={!search}
+					className="px-2 mt-0.5"
+					name="Kelas Saya"
+					onAddLabel="New Group Class"
+				>
+					{#if groups.length === 0}
+						<div class="text-center text-gray-500 py-4 text-sm">
+							No groups available
+						</div>
+					{:else}
+						<div class="flex flex-col">
+							{#each groups as group (group.id)}
+								<div class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800">
+									<!-- Group Name -->
+									<button class="flex-1 text-gray-900 dark:text-gray-200 truncate text-left"
+										on:click={async () => {
+											await goto(`/telyu/g/${group.id}`);
+										}}
+									>
+										{group.name}
+									</button>
 		{#if $showCreateGroup}
 			<AddGroup />
 		{:else}
