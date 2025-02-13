@@ -23,9 +23,6 @@
 		config,
 		group,
 		usersInGroup
-		config,
-		group,
-		usersInGroup
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -87,9 +84,6 @@
 };
 
 	let groups = [];
-	let group = {};
-	// let users = [];
-	// let users = [];
 	export let users = [];
   	let selectedUsers = [];
 
