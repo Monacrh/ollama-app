@@ -23,7 +23,9 @@
 		socket,
 		config,
 		group,
-		groups
+		groups,
+		showMemberPromptFromTeacher,
+		showGroup
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -142,7 +144,9 @@
 	// };
 
 	function gotoGroupPage(id) {
-		goto(`g/${id}`); // Navigates to the Users page
+		goto(`/telyu/g/${id}`); // Navigates to the Users page
+		showGroup.set(true);
+		showMemberPromptFromTeacher.set(false);
 	}
 
     const toggleMenu = (groupId) => {
@@ -163,18 +167,18 @@
     };
 
 	onMount(async () => {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            toast.error('User is not authenticated');
-            return;
-        }
+		try {
+			const token = localStorage.getItem('token');
+			if (!token) {
+				toast.error('User is not authenticated');
+				return;
+			}
 
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        toast.error(error?.message || 'Failed to load users');
-    }
-});
+		} catch (error) {
+			console.error('Error fetching users:', error);
+			toast.error(error?.message || 'Failed to load users');
+		}
+	});
 
     // Close menu when clicking outside
     onMount(() => {
@@ -692,7 +696,7 @@
 		</div> -->
 
 		<!-- /Cek apakah url mengarah ke kelas atau home -->
-		{#if $page.url.pathname.includes('telyu/g')}
+		{#if $showGroup && !$showMemberPromptFromTeacher}
 		<div
 			class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
 				? 'opacity-20'
@@ -745,7 +749,87 @@
 				</div>
 			</div>
 		</div>
-		{:else}
+		{:else if !$showGroup && $showMemberPromptFromTeacher}
+		<div
+			class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
+				? 'opacity-20'
+				: ''}"
+		>
+			<p class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200">
+				{"nama anggota"}
+			</p>
+			<!-- Daftar chat prompt -->
+			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
+				
+				<!-- Cari chat prompt -->
+				<div class="flex gap-1">
+					<div>
+						<button
+							on:click={() => {
+								showMemberPromptFromTeacher.set(false);
+								showGroup.set(true);
+							}}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+							</svg>
+						</button>
+					</div>
+					<Tooltip content={$i18n.t('Cari Chat Prompt')}>
+						<div class="flex flex-1">
+							<div class=" self-center ml-1 mr-3">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</div>
+							<input
+								class=" w-full text-sm pr-4 py-1 rounded-r-xl outline-none bg-transparent"
+								bind:value={search}
+								type="text"
+								placeholder={$i18n.t('Cari Chat Prompt')}
+							/>
+						</div>
+					</Tooltip>
+				</div>
+				<div class="pt-2.5">
+					{"Daftar Anggota"}
+					<!-- {#if group && filteredUsers !== undefined}
+						{#each filteredUsers as user(user.id)}
+							<ChatItem
+								className=""
+								id={user.id}
+								title={user.name}
+								{shiftKey}
+								selected={selectedChatId === user.id}
+								on:select={() => {
+									selectedChatId = user.id;
+								}}
+								on:unselect={() => {
+									selectedChatId = null;
+								}}
+								on:change={async () => {
+									initChatList();
+								}}
+								on:tag={(e) => {
+									const { type, name } = e.detail;
+									tagEventHandler(type, name, user.id);
+								}}
+							/>
+						{/each}
+					{/if} -->
+				</div>
+			</div>
+		</div>
+		{:else if !$showGroup && !$showMemberPromptFromTeacher && $page.url.pathname === '/telyu'}
 		<div
 			class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
 				? 'opacity-20'
@@ -803,7 +887,7 @@
 					{/if}
 				</Folder>
 			</div> -->
-		<!-- Kelas Saya -->
+			<!-- Kelas Saya -->
 			<Folder
 				collapsible={!search}
 				className="px-2 mt-0.5"
@@ -1138,11 +1222,11 @@
 				</div>
 			</Folder>
 		</div>
-		<FloatBtn />
 		{/if}
+		<FloatBtn />
 		{#if $showCreateGroup}
 			<AddGroup />
-			{/if}
+		{/if}
 		<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
 			<Folder
 				className="px-2 mt-0.5"

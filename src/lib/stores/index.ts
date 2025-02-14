@@ -84,6 +84,11 @@ export const currentChatPage = writable(1);
 export const isLastActiveTab = writable(true);
 export const playingNotificationSound = writable(false);
 
+export const showMemberPromptFromTeacher = writable(false);
+export const selectedMemberPrompt = writable(null);
+
+export const showGroup = writable(false);
+
 export type Model = OpenAIModel | OllamaModel;
 
 type BaseModel = {

@@ -11,6 +11,8 @@
 	import {
 		mobile,
 		showSidebar,
+		showMemberPromptFromTeacher,
+		showGroup,
 	} from '$lib/stores';
 
 	import DragGhost from '$lib/components/common/DragGhost.svelte';
@@ -121,10 +123,11 @@
 {/if}
 
 <div bind:this={itemElement} class=" w-full {className} relative group" {draggable}>
-	<a
+	<button
         class=" w-full flex justify-between rounded-lg px-[11px] py-[6px] bg-gray-100 dark:bg-gray-950 whitespace-nowrap text-ellipsis"
-        href="telyu/m/{id}"
-        on:click={() => {
+        on:click={async () => {
+			showMemberPromptFromTeacher.set(true);
+			showGroup.set(false);
             dispatch('select');
 
             if ($mobile) {
@@ -148,5 +151,5 @@
                 {useremail}
             </div>
         </div>
-    </a>
+    <button />
 </div>
