@@ -54,6 +54,7 @@ export const pinnedChats = writable([]);
 export const tags = writable([]);
 export const usersInGroup: Writable<UsersInGroup> = writable({});
 export const group: Writable<Group> = writable({});
+export const groups: Writable<Group[]> = writable([]);
 
 export const models: Writable<Model[]> = writable([]);
 

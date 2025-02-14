@@ -7,7 +7,6 @@
 
 	import {
 		group,
-
 		usersInGroup
 
 	} from '$lib/stores';
@@ -15,7 +14,6 @@
 
 	onMount(async () => {
 		group.set(await getGroupById(localStorage.token, $page.params.id));
-        console.log(group);
         usersInGroup.set( await getUsersInGroup(localStorage.token, $group.id));
         await tick();
 	});

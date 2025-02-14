@@ -22,7 +22,8 @@
 		channels,
 		socket,
 		config,
-		group
+		group,
+		groups
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -83,21 +84,23 @@
     };
 };
 
-	let groups = [];
 	export let users = [];
   	let selectedUsers = [];
+	let groupsMemberIn;
+	$: {
+		if (Array.isArray($groups)) {
+			groupsMemberIn = $groups;
+		} else {
+			console.error('groups is not an array');
+			groupsMemberIn = [];
+		}
+	}
 
 	let navElement;
 	let search = '';
-	
-	let sortKey = 'created_at';
-	let sortOrder = 'asc';
 
 	let filteredUsers;
-
 	$: {
-		console.log('usersInGroup', $usersInGroup);
-		console.log('usersInGroup.users', $usersInGroup.users);
 		if (Array.isArray($usersInGroup.users)) {
 			filteredUsers = $usersInGroup.users
 				.filter((user) => {
@@ -107,28 +110,6 @@
 						const name = user.name.toLowerCase();
 						const query = search.toLowerCase();
 						const isIncluded = name.includes(query);
-						console.log(`${query} included? ${isIncluded}`);
-						return isIncluded;
-					}
-				});
-		} else {
-			console.error('usersInGroup.users is not an array');
-            filteredUsers = [];
-		}
-	}
-	$: {
-		console.log('usersInGroup', $usersInGroup);
-		console.log('usersInGroup.users', $usersInGroup.users);
-		if (Array.isArray($usersInGroup.users)) {
-			filteredUsers = $usersInGroup.users
-				.filter((user) => {
-					if (search === '') {
-						return true;
-					} else {
-						const name = user.name.toLowerCase();
-						const query = search.toLowerCase();
-						const isIncluded = name.includes(query);
-						console.log(`${query} included? ${isIncluded}`);
 						return isIncluded;
 					}
 				});
@@ -160,8 +141,8 @@
 
 	// };
 
-	function gotoGroupPage() {
-		goto('/chat'); // Navigates to the Users page
+	function gotoGroupPage(id) {
+		goto(`g/${id}`); // Navigates to the Users page
 	}
 
     const toggleMenu = (groupId) => {
@@ -172,7 +153,7 @@
         if (confirm('Are you sure you want to delete this group class?')) {
             try {
                 await deleteGroupById(localStorage.token, groupId);
-                groups = groups.filter(g => g.id !== groupId);
+                groupsMemberIn.set(groupsMemberIn.filter(g => g.id !== groupId));
                 toast.success($i18n.t('Group deleted successfully'));
             } catch (error) {
                 toast.error(error?.message || $i18n.t('Failed to delete group'));
@@ -189,8 +170,6 @@
             return;
         }
 
-        users = await getUsers(token);
-        console.log('Users:', users);
     } catch (error) {
         console.error('Error fetching users:', error);
         toast.error(error?.message || 'Failed to load users');
@@ -204,17 +183,17 @@
         return () => document.removeEventListener('click', closeMenu);
     });
 
-	const setGroups = async () => {
-        try {
-            groups = await getGroups(localStorage.token);
-        } catch (error) {
-            toast.error(error);
-        }
-    };
+	// const setGroups = async () => {
+    //     try {
+    //         groups = await getGroups(localStorage.token);
+    //     } catch (error) {
+    //         toast.error(error);
+    //     }
+    // };
 
     // Load groups on component mount
     onMount(async () => {
-        await setGroups();
+        // await setGroups();
 	});
 
 	const initFolders = async () => {
@@ -754,7 +733,7 @@
 				</div>
 				<div class="pt-2.5">
 					{#if group && filteredUsers !== undefined}
-						 {#each filteredUsers as user}
+						{#each filteredUsers as user(user.id)}
 							<MemberItem
 								className=""
 								id={user.id}
@@ -762,20 +741,16 @@
 								email={user.email}
 							/>
 						{/each}
-						<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
-							<Spinner className=" size-4" />
-							<div class=" ">Loading...</div>
-						</div>
 					{/if}
 				</div>
 			</div>
 		</div>
 		{:else}
-			<div
-				class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
-					? 'opacity-20'
-					: ''}"
-			>
+		<div
+			class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
+				? 'opacity-20'
+				: ''}"
+		>
 				<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
 					<Folder
 						className="px-2 mt-0.5"
@@ -800,22 +775,22 @@
 				{/if} -->
 				
 				<!-- Kelas Saya -->
-				<Folder
+				<!-- <Folder
 					collapsible={!search}
 					className="px-2 mt-0.5"
 					name="Kelas Saya"
 					onAddLabel="New Group Class"
 				>
-					{#if groups.length === 0}
+					{#if groupsMemberIn.length === 0}
 						<div class="text-center text-gray-500 py-4 text-sm">
 							No groups available
 						</div>
 					{:else}
 						<div class="flex flex-col">
-							{#each groups as group (group.id)}
-								<div class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800">
+							{#each groupsMemberIn as group (group.id)}
+								<div class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800"> -->
 									<!-- Group Name -->
-									<button class="flex-1 text-gray-900 dark:text-gray-200 truncate text-left"
+									<!-- <button class="flex-1 text-gray-900 dark:text-gray-200 truncate text-left"
 										on:click={async () => {
 											await goto(`/telyu/g/${group.id}`);
 										}}
@@ -827,191 +802,165 @@
 						</div>
 					{/if}
 				</Folder>
-			</div>
-		{/if}
-		{#if $showCreateGroup}
-			<AddGroup />
-		{/if}
-		<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
+			</div> -->
+		<!-- Kelas Saya -->
 			<Folder
+				collapsible={!search}
 				className="px-2 mt-0.5"
-				name={$i18n.t('Channels')}
-				dragAndDrop={false}
-				onAdd={$user.role === 'admin'
-					? () => {
-							showCreateChannel = true;
-						}
-					: null}
-				onAddLabel={$i18n.t('Create Channel')}
+				name="Kelas Saya"
+				onAddLabel="New Group Class"
 			>
-				{#each $channels as channel}
-					<ChannelItem
-						{channel}
-						onUpdate={async () => {
-							await initChannels();
-						}}
-					/>
-				{/each}
-			</Folder>
-		{/if} -->
-		<Folder
-			collapsible={!search}
-			className="px-2 mt-0.5"
-			name="Kelas Saya"
-			onAddLabel="New Group Class"
-		>
-			{#if groups.length === 0}
-			<div class="text-center text-gray-500 py-4 text-sm">
-				No groups available
-			</div>
-			{:else}
-			<div class="flex flex-col">
-				{#each groups as group (group.id)}
-					<div 
-						class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800"
-						on:click={async () => {
-							try {
-								// Call the gotoGroupPage function (assuming it might be async)
-								await gotoGroupPage();
-						
-								// Update the Svelte store to hide the welcome screen
-								$showWelcomeScreen = false;
-						
-								// Store the first visit status in localStorage
-								localStorage.setItem('firstVisit', 'completed');
-							} catch (error) {
-								console.error("An error occurred during the click handler:", error);
-							}
-						}}
-						role="button"
-						tabindex="0"
-						on:keydown={(e) => ['Enter', ' '].includes(e.key) && gotoGroupPage(group.id)}
-						aria-label="View {group.name} details"
-					>
-						<!-- Group Name -->
-						<div class="flex-1 text-gray-900 dark:text-gray-200 truncate">
-							{group.name}
-						</div>
-
-						<!-- Context Menu -->
-						<div class="relative">
-							<button
-								class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
-								on:click|stopPropagation={() => toggleMenu(group.id)}
-								aria-label="Open actions menu for {group.name}"
-								aria-haspopup="true"
-								aria-expanded={activeMenuId === group.id}
-								data-group={group.id}
-							>
-								<svg 
-									xmlns="http://www.w3.org/2000/svg" 
-									class="h-5 w-5 text-gray-500" 
-									fill="none" 
-									viewBox="0 0 24 24" 
-									stroke="currentColor"
-									aria-hidden="true"
-								>
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
-								</svg>
-							</button>
-
-							{#if activeMenuId === group.id}
-								<div 
-									class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black ring-opacity-5"
-									role="menu"
-									aria-orientation="vertical"
-									data-menu={group.id}
-								>
-									<div class="py-1">
-										<button
-											class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
-											on:click|stopPropagation={() => handleEditGroup(group.id)}
-											role="menuitem"
-											tabindex="-1"
-											on:keydown={(e) => handleMenuKeydown(e, group.id)}
-										>
-											Kelolah
-										</button>
-										<button
-											class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
-											on:click|stopPropagation={() => handleDeleteGroup(group.id)}
-											role="menuitem"
-											tabindex="-1"
-											on:keydown={(e) => handleMenuKeydown(e, group.id)}
-										>
-											Delete
-										</button>
-									</div>
-								</div>
-							{/if}
-						</div>
-					</div>
-				{/each}
-			</div>
-			{/if}
-		</Folder>
-
-		<!-- Chat Saya -->
-		<Folder
-			collapsible={!search}
-			className="px-2 mt-0.5"
-			name={$i18n.t('Chat Saya')}
-			onAdd={() => {
-				createFolder();
-			}}
-			onAddLabel={$i18n.t('Chat Saya')}
-			on:import={(e) => {
-				importChatHandler(e.detail);
-			}}
-			on:drop={async (e) => {
-				const { type, id, item } = e.detail;
-				// Dismiss welcome screen when dropping items
-				$showWelcomeScreen = false;
-				localStorage.setItem('firstVisit', 'completed');
-
-				if (type === 'chat') {
-					let chat = await getChatById(localStorage.token, id).catch((error) => {
-						return null;
-					});
-					if (!chat && item) {
-						chat = await importChat(localStorage.token, item.chat, item?.meta ?? {});
-					}
-
-					if (chat) {
-						console.log(chat);
-						if (chat.folder_id) {
-							const res = await updateChatFolderIdById(localStorage.token, chat.id, null).catch(
-								(error) => {
-									toast.error(error);
-									return null;
+				{#if groupsMemberIn.length === 0}
+				<div class="text-center text-gray-500 py-4 text-sm">
+					Tidak ada kelas
+				</div>
+				{:else}
+				<div class="flex flex-col">
+					{#each groupsMemberIn as group (group.id)}
+						<div 
+							class="group relative flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer border-b border-gray-200 dark:border-gray-800"
+							on:click={async () => {
+								try {
+									// Call the gotoGroupPage function (assuming it might be async)
+									await gotoGroupPage(group.id);
+							
+									// Update the Svelte store to hide the welcome screen
+									$showWelcomeScreen = false;
+							
+									// Store the first visit status in localStorage
+									localStorage.setItem('firstVisit', 'completed');
+								} catch (error) {
+									console.error("An error occurred during the click handler:", error);
 								}
-							);
-						}
+							}}
+							role="button"
+							tabindex="0"
+							on:keydown={(e) => ['Enter', ' '].includes(e.key) && gotoGroupPage(group.id)}
+							aria-label="View {group.name} details"
+						>
+							<!-- Group Name -->
+							<div class="flex-1 text-gray-900 dark:text-gray-200 truncate">
+								{group.name}
+							</div>
 
-						if (chat.pinned) {
-							const res = await toggleChatPinnedStatusById(localStorage.token, chat.id);
-						}
+							<!-- Context Menu -->
+							<div class="relative">
+								<button
+									class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
+									on:click|stopPropagation={() => toggleMenu(group.id)}
+									aria-label="Open actions menu for {group.name}"
+									aria-haspopup="true"
+									aria-expanded={activeMenuId === group.id}
+									data-group={group.id}
+								>
+									<svg 
+										xmlns="http://www.w3.org/2000/svg" 
+										class="h-5 w-5 text-gray-500" 
+										fill="none" 
+										viewBox="0 0 24 24" 
+										stroke="currentColor"
+										aria-hidden="true"
+									>
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+									</svg>
+								</button>
 
-						initChatList();
-					}
-				} else if (type === 'folder') {
-					if (folders[id].parent_id === null) {
-						return;
-					}
+								{#if activeMenuId === group.id}
+									<div 
+										class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white dark:bg-gray-900 shadow-lg ring-1 ring-black ring-opacity-5"
+										role="menu"
+										aria-orientation="vertical"
+										data-menu={group.id}
+									>
+										<div class="py-1">
+											<button
+												class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+												on:click|stopPropagation={() => handleEditGroup(group.id)}
+												role="menuitem"
+												tabindex="-1"
+												on:keydown={(e) => handleMenuKeydown(e, group.id)}
+											>
+												Kelolah
+											</button>
+											<button
+												class="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+												on:click|stopPropagation={() => handleDeleteGroup(group.id)}
+												role="menuitem"
+												tabindex="-1"
+												on:keydown={(e) => handleMenuKeydown(e, group.id)}
+											>
+												Delete
+											</button>
+										</div>
+									</div>
+								{/if}
+							</div>
+						</div>
+					{/each}
+				</div>
+				{/if}
+			</Folder>
 
-					const res = await updateFolderParentIdById(localStorage.token, id, null).catch(
-						(error) => {
-							toast.error(error);
+			<!-- Chat Saya -->
+			<Folder
+				collapsible={!search}
+				className="px-2 mt-0.5"
+				name={$i18n.t('Chat Saya')}
+				onAdd={() => {
+					createFolder();
+				}}
+				onAddLabel={$i18n.t('Chat Saya')}
+				on:import={(e) => {
+					importChatHandler(e.detail);
+				}}
+				on:drop={async (e) => {
+					const { type, id, item } = e.detail;
+					// Dismiss welcome screen when dropping items
+					$showWelcomeScreen = false;
+					localStorage.setItem('firstVisit', 'completed');
+
+					if (type === 'chat') {
+						let chat = await getChatById(localStorage.token, id).catch((error) => {
 							return null;
+						});
+						if (!chat && item) {
+							chat = await importChat(localStorage.token, item.chat, item?.meta ?? {});
 						}
-					);
 
-					if (res) {
-						await initFolders();
+						if (chat) {
+							if (chat.folder_id) {
+								const res = await updateChatFolderIdById(localStorage.token, chat.id, null).catch(
+									(error) => {
+										toast.error(error);
+										return null;
+									}
+								);
+							}
+
+							if (chat.pinned) {
+								const res = await toggleChatPinnedStatusById(localStorage.token, chat.id);
+							}
+
+							initChatList();
+						}
+					} else if (type === 'folder') {
+						if (folders[id].parent_id === null) {
+							return;
+						}
+
+						const res = await updateFolderParentIdById(localStorage.token, id, null).catch(
+							(error) => {
+								toast.error(error);
+								return null;
+							}
+						);
+
+						if (res) {
+							await initFolders();
+						}
 					}
-				}
-			}}
-		>
+				}}
+			>
 			<!-- {#if $temporaryChatEnabled}
 				<div class="absolute z-40 w-full h-full flex justify-center"></div>
 			{/if} -->
@@ -1108,87 +1057,115 @@
 				/>
 			{/if} -->
 
-			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
-				<div class="pt-2.5">
-					{#if $chats}
-						{#each $chats as chat, idx}
-							{#if idx === 0 || (idx > 0 && chat.time_range !== $chats[idx - 1].time_range)}
-								<div
-									class="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium {idx ===
-									0
-										? ''
-										: 'pt-5'} pb-1.5"
+				<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
+					<div class="pt-2.5">
+						{#if $chats}
+							{#each $chats as chat, idx}
+								{#if idx === 0 || (idx > 0 && chat.time_range !== $chats[idx - 1].time_range)}
+									<div
+										class="w-full pl-2.5 text-xs text-gray-500 dark:text-gray-500 font-medium {idx ===
+										0
+											? ''
+											: 'pt-5'} pb-1.5"
+									>
+										{$i18n.t(chat.time_range)}
+										<!-- localisation keys for time_range to be recognized from the i18next parser (so they don't get automatically removed):
+										{$i18n.t('Today')}
+										{$i18n.t('Yesterday')}
+										{$i18n.t('Previous 7 days')}
+										{$i18n.t('Previous 30 days')}
+										{$i18n.t('January')}
+										{$i18n.t('February')}
+										{$i18n.t('March')}
+										{$i18n.t('April')}
+										{$i18n.t('May')}
+										{$i18n.t('June')}
+										{$i18n.t('July')}
+										{$i18n.t('August')}
+										{$i18n.t('September')}
+										{$i18n.t('October')}
+										{$i18n.t('November')}
+										{$i18n.t('December')}
+										-->
+									</div>
+								{/if}
+
+								<ChatItem
+									className=""
+									id={chat.id}
+									title={chat.title}
+									{shiftKey}
+									selected={selectedChatId === chat.id}
+									on:select={() => {
+										selectedChatId = chat.id;
+									}}
+									on:unselect={() => {
+										selectedChatId = null;
+									}}
+									on:change={async () => {
+										initChatList();
+									}}
+									on:tag={(e) => {
+										const { type, name } = e.detail;
+										tagEventHandler(type, name, chat.id);
+									}}
+								/>
+							{/each}
+
+							{#if $scrollPaginationEnabled && !allChatsLoaded}
+								<Loader
+									on:visible={(e) => {
+										if (!chatListLoading) {
+											loadMoreChats();
+										}
+									}}
 								>
-									{$i18n.t(chat.time_range)}
-									<!-- localisation keys for time_range to be recognized from the i18next parser (so they don't get automatically removed):
-									{$i18n.t('Today')}
-									{$i18n.t('Yesterday')}
-									{$i18n.t('Previous 7 days')}
-									{$i18n.t('Previous 30 days')}
-									{$i18n.t('January')}
-									{$i18n.t('February')}
-									{$i18n.t('March')}
-									{$i18n.t('April')}
-									{$i18n.t('May')}
-									{$i18n.t('June')}
-									{$i18n.t('July')}
-									{$i18n.t('August')}
-									{$i18n.t('September')}
-									{$i18n.t('October')}
-									{$i18n.t('November')}
-									{$i18n.t('December')}
-									-->
-								</div>
+									<div
+										class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
+									>
+										<Spinner className=" size-4" />
+										<div class=" ">Loading...</div>
+									</div>
+								</Loader>
 							{/if}
-
-							<ChatItem
-								className=""
-								id={chat.id}
-								title={chat.title}
-								{shiftKey}
-								selected={selectedChatId === chat.id}
-								on:select={() => {
-									selectedChatId = chat.id;
-								}}
-								on:unselect={() => {
-									selectedChatId = null;
-								}}
-								on:change={async () => {
-									initChatList();
-								}}
-								on:tag={(e) => {
-									const { type, name } = e.detail;
-									tagEventHandler(type, name, chat.id);
-								}}
-							/>
-						{/each}
-
-						{#if $scrollPaginationEnabled && !allChatsLoaded}
-							<Loader
-								on:visible={(e) => {
-									if (!chatListLoading) {
-										loadMoreChats();
-									}
-								}}
-							>
-								<div
-									class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
-								>
-									<Spinner className=" size-4" />
-									<div class=" ">Loading...</div>
-								</div>
-							</Loader>
+						{:else}
+							<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
+								<Spinner className=" size-4" />
+								<div class=" ">Loading...</div>
+							</div>
 						{/if}
-					{:else}
-						<div class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2">
-							<Spinner className=" size-4" />
-							<div class=" ">Loading...</div>
-						</div>
-					{/if}
+					</div>
 				</div>
-			</div>
-		</Folder>
+			</Folder>
+		</div>
 		<FloatBtn />
+		{/if}
+		{#if $showCreateGroup}
+			<AddGroup />
+			{/if}
+		<!-- {#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
+			<Folder
+				className="px-2 mt-0.5"
+				name={$i18n.t('Channels')}
+				dragAndDrop={false}
+				onAdd={$user.role === 'admin'
+					? () => {
+							showCreateChannel = true;
+						}
+					: null}
+				onAddLabel={$i18n.t('Create Channel')}
+			>
+				{#each $channels as channel}
+					<ChannelItem
+						{channel}
+						onUpdate={async () => {
+							await initChannels();
+						}}
+					/>
+				{/each}
+			</Folder>
+		{/if} -->
+		
 		<!-- {/if} -->
 		<!-- admin panel -->
 		<!-- <div class="px-2">

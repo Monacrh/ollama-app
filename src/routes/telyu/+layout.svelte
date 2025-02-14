@@ -35,8 +35,11 @@
 		banners,
 		showSettings,
 		showChangelog,
-		temporaryChatEnabled
+		temporaryChatEnabled,
+		groups
 	} from '$lib/stores';
+
+	import { getGroups } from '$lib/apis/groups';
 
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
@@ -51,6 +54,11 @@
 	let localDBChats = [];
 
 	let version;
+
+	onMount(async () => {
+        groups.set( await getGroups(localStorage.token));
+		await tick();
+	})
 
 	onMount(async () => {
 		// Cek apakah user sudah login
