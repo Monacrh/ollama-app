@@ -1,5 +1,17 @@
 import { WEBUI_API_BASE_URL } from '$lib/constants';
 import { getTimeRange } from '$lib/utils';
+// import type { Message } from '$lib/types';
+
+// const STORAGE_PREFIX = 'chatMessages_';
+
+// export const loadMessages = (groupId: string): Message[] => {
+//     const data = localStorage.getItem(`${STORAGE_PREFIX}${groupId}`);
+//     return data ? JSON.parse(data) : [];
+// };
+
+// export const saveMessages = (groupId: string, messages: Message[]): void => {
+//     localStorage.setItem(`${STORAGE_PREFIX}${groupId}`, JSON.stringify(messages));
+// };
 
 export const createNewChat = async (token: string, chat: object) => {
 	let error = null;

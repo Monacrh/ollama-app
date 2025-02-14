@@ -1,6 +1,7 @@
 import { WEBUI_API_BASE_URL } from '$lib/constants';
 
-export const createNewGroup = async (token: string, group: object) => {
+// export const createNewGroup = async (token: string, group: object) => {
+	export const createNewGroup = async (token: string, group: object, name: string, userIds: string[]) => {
 	let error = null;
 
 	const res = await fetch(`${WEBUI_API_BASE_URL}/groups/create`, {
@@ -11,7 +12,9 @@ export const createNewGroup = async (token: string, group: object) => {
 			authorization: `Bearer ${token}`
 		},
 		body: JSON.stringify({
-			...group
+			...group,
+			name,
+            user_ids: userIds
 		})
 	})
 		.then(async (res) => {

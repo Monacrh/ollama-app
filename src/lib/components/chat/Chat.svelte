@@ -1873,9 +1873,13 @@
 			{initNewChat}
 		/>
 
+
 		<!-- Welcome Screen -->
 		{#if $showWelcomeScreen}
-	<div class="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-900 z-10">
+	<div 
+	class="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-900 z-10"
+		class:shifted={$showSidebar}
+	>
 		<div class="flex flex-col items-center justify-center h-full w-full">
 			<!-- Logo -->
 			<div class="animate-float mb-4">
@@ -1908,7 +1912,6 @@
 		</div>
 	</div>
 {/if}
-
 		<!-- Chat Interface (only shows when not in welcome screen) -->
 		{#if !$showWelcomeScreen}
 		<PaneGroup direction="horizontal" class="w-full h-full">
@@ -2043,5 +2046,9 @@
 	}
 	.animate-float {
 		animation: float 3s ease-in-out infinite;
+	}
+
+	.shifted {
+		margin-left: 250px; /* Adjust width according to sidebar */
 	}
 </style>

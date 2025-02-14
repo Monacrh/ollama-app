@@ -5,8 +5,17 @@ import type { Banner } from '$lib/types';
 import type { Socket } from 'socket.io-client';
 
 import emojiShortCodes from '$lib/emoji-shortcodes.json';
+import type { Message } from '$lib/types';
+import type { Group, User } from '$lib/types';
 
 export const showCreateGroup = writable(false);
+export const groupStore = writable(null);
+export const showDetailGroup = writable(false);
+
+export const currentGroupId = writable<string | null>(null);
+export const groupMessages = writable<Record<string, Message[]>>({});
+export const currentGroup = writable<Group | null>(null);
+export const groupMembers = writable<User[]>([]);
 
 // Backend
 export const WEBUI_NAME = writable(APP_NAME);

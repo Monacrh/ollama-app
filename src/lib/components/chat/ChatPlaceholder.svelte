@@ -85,7 +85,7 @@
 					{#if models[selectedModelIdx]?.name}
 						{models[selectedModelIdx]?.name}
 					{:else}
-						<!-- {$i18n.t('Hello, {{name}}', { name: $user.name })} -->
+						{$i18n.t('Hello, {{name}}', { name: $user.name })}
 					{/if}
 				</div>
 
@@ -116,14 +116,14 @@
 						{/if}
 					{:else}
 						<div class=" font-medium text-gray-400 dark:text-gray-500 line-clamp-1 font-p">
-							<!-- {$i18n.t('How can I help you today?')} -->
+							{$i18n.t('Selamat datang di Ollama Universitas Telkom')}
 						</div>
 					{/if}
 				</div>
 			</div>
 		</div>
 
-		<!-- <div class=" w-full font-primary" in:fade={{ duration: 200, delay: 300 }}>
+		<div class=" w-full font-primary" in:fade={{ duration: 200, delay: 300 }}>
 			<Suggestions
 				className="grid grid-cols-2"
 				suggestionPrompts={models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
@@ -133,6 +133,6 @@
 					submitPrompt(e.detail);
 				}}
 			/>
-		</div> -->
+		</div>
 	</div>
 {/key}

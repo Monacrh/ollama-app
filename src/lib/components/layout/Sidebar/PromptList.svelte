@@ -22,10 +22,15 @@
 	// State variables
 	let name = '';
 	let description = '';
-	let selectedUserIds: string[] = [];
+	// let userIds: string[] = [];
 	let loading = false;
-	let users = []; // Local users list instead of prop
-	let query = '';
+	// let users = []; // Local users list instead of prop
+	// let query = '';
+
+	export let users = [];
+	export let userIds = [];
+
+	let filteredUsers = [];
 
 	onMount(async () => {
 		try {
@@ -44,22 +49,35 @@
 
 	$: filteredUsers = users
 		.filter((user) => {
-			if (user?.role === 'admin') return false;
-			if (!query) return true;
+			if (user?.role === 'admin') {
+				return false;
+			}
+
+			if (query === '') {
+				return true;
+			}
+
 			return (
 				user.name.toLowerCase().includes(query.toLowerCase()) ||
 				user.email.toLowerCase().includes(query.toLowerCase())
 			);
 		})
 		.sort((a, b) => {
-			// Sort selected users first
-			const aSelected = selectedUserIds.includes(a.id);
-			const bSelected = selectedUserIds.includes(b.id);
-			
-			if (aSelected && !bSelected) return -1;
-			if (!aSelected && bSelected) return 1;
+			const aUserIndex = userIds.indexOf(a.id);
+			const bUserIndex = userIds.indexOf(b.id);
+
+			// Compare based on userIds or fall back to alphabetical order
+			if (aUserIndex !== -1 && bUserIndex === -1) return -1; // 'a' has valid userId -> prioritize
+			if (bUserIndex !== -1 && aUserIndex === -1) return 1; // 'b' has valid userId -> prioritize
+
+			// Both a and b are either in the userIds array or not, so we'll sort them by their indices
+			if (aUserIndex !== -1 && bUserIndex !== -1) return aUserIndex - bUserIndex;
+
+			// If both are not in the userIds, fallback to alphabetical sorting by name
 			return a.name.localeCompare(b.name);
 		});
+
+	let query = '';
 
 	const submitHandler = async () => {
 		if (!name) {
@@ -67,7 +85,7 @@
 			return;
 		}
 
-		if (selectedUserIds.length === 0) {
+		if (userIds.length === 0) {
 			toast.error($i18n.t('Select at least one member'));
 			return;
 		}
@@ -78,7 +96,7 @@
 			await createNewGroup(localStorage.token, {
 				name,
 				description,
-				members: selectedUserIds.map(id => ({ id }))
+				members: userIds.map(id => ({ id }))
 			});
 
 			toast.success($i18n.t('Group created successfully'));
@@ -96,7 +114,7 @@
 	const resetForm = () => {
 		name = '';
 		description = '';
-		selectedUserIds = [];
+		userIds = [];
 	};
 </script>
 
@@ -140,41 +158,52 @@
 			/>
 			
 			<div class="mt-3 max-h-[22rem] overflow-y-auto scrollbar-hidden">
-				{#each filteredUsers as user (user.id)}
-					<div class="flex items-center gap-3 w-full text-sm p-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-						<Checkbox
-							state={selectedUserIds.includes(user.id) ? 'checked' : 'unchecked'}
-							on:change={(e) => {
-								if (e.detail === 'checked') {
-									selectedUserIds = [...selectedUserIds, user.id];
-								} else {
-									selectedUserIds = selectedUserIds.filter(id => id !== user.id);
-								}
-							}}
-						/>
-
-						<div class="flex flex-1 items-center justify-between">
-							<Tooltip content={user.email}>
+				<div class="flex flex-col gap-2.5">
+					{#if filteredUsers.length > 0}
+						{#each filteredUsers as user, userIdx (user.id)}
+							<div class="flex flex-row items-center gap-3 w-full text-sm">
 								<div class="flex items-center">
-									<img
-										class="rounded-full size-5 object-cover mr-2.5"
-										src={user.profile_image_url}
-										alt="user"
+									<Checkbox
+										state={userIds.includes(user.id) ? 'checked' : 'unchecked'}
+										on:change={(e) => {
+											if (e.detail === 'checked') {
+												userIds = [...userIds, user.id];
+											} else {
+												userIds = userIds.filter((id) => id !== user.id);
+											}
+										}}
 									/>
-									<span class="font-medium">{user.name}</span>
 								</div>
-							</Tooltip>
-
-							{#if selectedUserIds.includes(user.id)}
-								<Badge type="success" content="member" />
-							{/if}
+		
+								<div class="flex w-full items-center justify-between">
+									<Tooltip content={user.email} placement="top-start">
+										<div class="flex">
+											<img
+												class=" rounded-full size-5 object-cover mr-2.5"
+												src={user.profile_image_url.startsWith(WEBUI_BASE_URL) ||
+												user.profile_image_url.startsWith('https://www.gravatar.com/avatar/') ||
+												user.profile_image_url.startsWith('data:')
+													? user.profile_image_url
+													: `/user.png`}
+												alt="user"
+											/>
+		
+											<div class=" font-medium self-center">{user.name}</div>
+										</div>
+									</Tooltip>
+		
+									{#if userIds.includes(user.id)}
+										<Badge type="success" content="member" />
+									{/if}
+								</div>
+							</div>
+						{/each}
+					{:else}
+						<div class="text-gray-500 text-xs text-center py-2 px-10">
+							{$i18n.t('No users were found.')}
 						</div>
-					</div>
-				{:else}
-					<div class="text-gray-500 text-xs text-center py-2">
-						{$i18n.t('No users found')}
-					</div>
-				{/each}
+					{/if}
+				</div>
 			</div>
 		</div>
 
