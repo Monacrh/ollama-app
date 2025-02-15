@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, tick, getContext } from 'svelte';
+	import { onMount, tick, getContext, onDestroy } from 'svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -7,7 +7,7 @@
 
 	import {
 		group,
-		usersInGroup
+		usersInGroup,
 
 	} from '$lib/stores';
 	import { getGroupById, getUsersInGroup } from '$lib/apis/groups';
@@ -17,7 +17,13 @@
         usersInGroup.set( await getUsersInGroup(localStorage.token, $group.id));
         await tick();
 	});
-	// };
+	
+
+	onDestroy(async () => {
+		group.set({});
+		usersInGroup.set({});
+		await tick();
+	});
 </script>
 
 <slot />

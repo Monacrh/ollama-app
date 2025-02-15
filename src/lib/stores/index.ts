@@ -89,6 +89,8 @@ export const selectedMemberPrompt = writable(null);
 
 export const showGroup = writable(false);
 
+export const selectedUser: Writable<SelectedUser> = writable({});
+
 export type Model = OpenAIModel | OllamaModel;
 
 type BaseModel = {
@@ -288,4 +290,11 @@ type UsersInGroup = {
 	id: string;
 	user_id: string;
 	users: User[];
+}
+
+type SelectedUser = {
+	id: string;
+	email: string;
+	name: string;
+	chats: [];
 }

@@ -13,10 +13,17 @@
 		showSidebar,
 		showMemberPromptFromTeacher,
 		showGroup,
+		selectedUser,
+
+		theme
+
 	} from '$lib/stores';
+
+	import { getChatListByUserId } from '$lib/apis/chats';
 
 	import DragGhost from '$lib/components/common/DragGhost.svelte';
 	import Document from '$lib/components/icons/Document.svelte';
+	import { json } from '@sveltejs/kit';
 
 	export let className = '';
 
@@ -128,7 +135,13 @@
         on:click={async () => {
 			showMemberPromptFromTeacher.set(true);
 			showGroup.set(false);
-            dispatch('select');
+
+			if ($showMemberPromptFromTeacher) {
+				let chats = await getChatListByUserId(localStorage.token, id);
+				selectedUser.set({ id, name, email, chats });
+			}
+
+			dispatch('select');
 
             if ($mobile) {
                 showSidebar.set(false);

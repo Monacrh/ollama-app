@@ -6,40 +6,31 @@
 	import { usersInGroup } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import {
-		user,
 		chats,
-		settings,
-		showSettings,
-		chatId,
 		tags,
 		showSidebar,
 		mobile,
-		showArchivedChats,
 		pinnedChats,
 		scrollPaginationEnabled,
 		currentChatPage,
 		temporaryChatEnabled,
 		channels,
-		socket,
-		config,
 		group,
 		groups,
 		showMemberPromptFromTeacher,
-		showGroup
+		showGroup,
+		selectedUser
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
 	const i18n = getContext('i18n');
 
 	import {
-		deleteChatById,
 		getChatList,
 		getAllTags,
 		getChatListBySearchText,
-		createNewChat,
 		getPinnedChatList,
 		toggleChatPinnedStatusById,
-		getChatPinnedStatusById,
 		getChatById,
 		updateChatFolderIdById,
 		importChat
@@ -755,26 +746,30 @@
 				? 'opacity-20'
 				: ''}"
 		>
-			<p class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200">
-				{"nama anggota"}
-			</p>
+			<div class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200 flex gap-4">
+				<button
+				on:click={() => {
+					showMemberPromptFromTeacher.set(false);
+					showGroup.set(true);
+				}}
+					>
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+					</svg>
+				</button>
+				<p>
+					{#if $selectedUser}
+						{$selectedUser.name}
+					{:else}
+						Nama anggota
+					{/if}
+				</p>
+			</div>
 			<!-- Daftar chat prompt -->
 			<div class=" flex-1 flex flex-col overflow-y-auto scrollbar-hidden">
 				
 				<!-- Cari chat prompt -->
 				<div class="flex gap-1">
-					<div>
-						<button
-							on:click={() => {
-								showMemberPromptFromTeacher.set(false);
-								showGroup.set(true);
-							}}
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-							</svg>
-						</button>
-					</div>
 					<Tooltip content={$i18n.t('Cari Chat Prompt')}>
 						<div class="flex flex-1">
 							<div class=" self-center ml-1 mr-3">
@@ -801,17 +796,16 @@
 					</Tooltip>
 				</div>
 				<div class="pt-2.5">
-					{"Daftar Anggota"}
-					<!-- {#if group && filteredUsers !== undefined}
-						{#each filteredUsers as user(user.id)}
+					{#if $group && $selectedUser}
+						<!-- {#each $selectedUser?.chats as chat(chat.id)}
 							<ChatItem
 								className=""
-								id={user.id}
-								title={user.name}
+								id={chat?.id}
+								title={chat?.title}
 								{shiftKey}
-								selected={selectedChatId === user.id}
+								selected={selectedChatId === chat?.id}
 								on:select={() => {
-									selectedChatId = user.id;
+									selectedChatId = chat?.id;
 								}}
 								on:unselect={() => {
 									selectedChatId = null;
@@ -821,15 +815,20 @@
 								}}
 								on:tag={(e) => {
 									const { type, name } = e.detail;
-									tagEventHandler(type, name, user.id);
+									tagEventHandler(type, name, chat?.id);
 								}}
 							/>
-						{/each}
-					{/if} -->
+						{/each} -->
+						Hai
+					{:else}
+						<div class="text-center text-gray-500 py-4 text-sm">
+							No chats available
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
-		{:else if !$showGroup && !$showMemberPromptFromTeacher && $page.url.pathname === '/telyu'}
+		{:else if !$showGroup && !$showMemberPromptFromTeacher && $page.url.pathname === '/telyu' || $page.url.pathname === '/telyu/'}
 		<div
 			class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden {$temporaryChatEnabled
 				? 'opacity-20'
