@@ -746,14 +746,22 @@
 				? 'opacity-20'
 				: ''}"
 		>
-			<div class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200 flex gap-4">
+			<div class="px-2 mt-0.5 w-full pt-2.5 text-medium text-gray-500 dark:text-gray-200 flex gap-1">
 				<button
-				on:click={() => {
-					showMemberPromptFromTeacher.set(false);
-					showGroup.set(true);
-				}}
+					on:click={() => {
+						showMemberPromptFromTeacher.set(false);
+						showGroup.set(true);
+						goto(`/telyu/g/${$group.id}`);
+					}}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+						class="size-3"
 					>
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
 					</svg>
 				</button>

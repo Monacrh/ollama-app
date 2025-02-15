@@ -8,13 +8,14 @@
 
 	const dispatch = createEventDispatcher();
 
+	import { page } from '$app/stores';
+
 	import {
 		mobile,
 		showSidebar,
 		showMemberPromptFromTeacher,
 		showGroup,
 		selectedUser,
-
 		theme
 
 	} from '$lib/stores';
@@ -146,6 +147,8 @@
             if ($mobile) {
                 showSidebar.set(false);
             }
+
+			await goto(`/telyu/g/${$page.params.id}/${id}`);
         }}
         on:mouseenter={(e) => {
             mouseOver = true;
