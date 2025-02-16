@@ -3,7 +3,7 @@
 	import { v4 as uuidv4 } from 'uuid';
 
 	import { page } from '$app/stores';
-	import { usersInGroup } from '$lib/stores';
+	import { selectedChats, usersInGroup } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import {
 		chats,
@@ -804,8 +804,8 @@
 					</Tooltip>
 				</div>
 				<div class="pt-2.5">
-					{#if $group && $selectedUser}
-						<!-- {#each $selectedUser?.chats as chat(chat.id)}
+					{#if $selectedChats && $selectedUser}
+						{#each $selectedChats as chat(chat.id)}
 							<ChatItem
 								className=""
 								id={chat?.id}
@@ -826,7 +826,7 @@
 									tagEventHandler(type, name, chat?.id);
 								}}
 							/>
-						{/each} -->
+						{/each}
 						Hai
 					{:else}
 						<div class="text-center text-gray-500 py-4 text-sm">

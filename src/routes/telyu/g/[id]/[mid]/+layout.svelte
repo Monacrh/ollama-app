@@ -8,14 +8,23 @@
 	import {
 		group,
 		usersInGroup,
+		selectedUser,
+		showMemberPromptFromTeacher,
+		selectedChats
+
 
 	} from '$lib/stores';
-	import { getGroupById, getUsersInGroup } from '$lib/apis/groups';
+	import { getChatListByUserId } from '$lib/apis/chats';
 
 	onMount(async () => {
         console.log(`/telyu/g/${$page.params.id}/${
             $page.params.mid
         }`);
+		if ($showMemberPromptFromTeacher) {
+			selectedChats.set(await getChatListByUserId(localStorage.token, $page.params.mid));
+		}
+
+
         await tick();
 	});
 	

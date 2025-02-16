@@ -138,8 +138,7 @@
 			showGroup.set(false);
 
 			if ($showMemberPromptFromTeacher) {
-				let chats = await getChatListByUserId(localStorage.token, id);
-				selectedUser.set({ id, name, email, chats });
+				selectedUser.set({ id, name, email });
 			}
 
 			dispatch('select');

@@ -86,6 +86,7 @@ export const playingNotificationSound = writable(false);
 
 export const showMemberPromptFromTeacher = writable(false);
 export const selectedMemberPrompt = writable(null);
+export const selectedChats = writable([]);
 
 export const showGroup = writable(false);
 
@@ -296,5 +297,4 @@ type SelectedUser = {
 	id: string;
 	email: string;
 	name: string;
-	chats: [];
 }
